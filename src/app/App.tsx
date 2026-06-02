@@ -107,23 +107,14 @@ export default function App() {
 
   return (
     <div
-      className="min-h-screen bg-[#e8ede6] flex items-center justify-center"
+      className="min-h-screen bg-background"
       style={{ fontFamily: "'DM Sans', sans-serif" }}
     >
-      {/* Phone frame */}
-      <div
-        className="relative bg-background overflow-hidden shadow-2xl"
-        style={{
-          width: 'min(100vw, 390px)',
-          height: 'min(100vh, 844px)',
-          borderRadius: 'clamp(0px, 3vw, 44px)',
-        }}
-      >
         <AnimatePresence mode="wait">
           {!loggedIn ? (
             <motion.div
               key="login"
-              className="absolute inset-0"
+              className="min-h-screen"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
@@ -133,7 +124,7 @@ export default function App() {
           ) : (
             <motion.div
               key="app"
-              className="absolute inset-0"
+              className="min-h-screen relative"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
             >
@@ -241,7 +232,6 @@ export default function App() {
             </motion.div>
           )}
         </AnimatePresence>
-      </div>
     </div>
   );
 }
