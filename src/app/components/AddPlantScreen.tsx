@@ -223,11 +223,11 @@ export function AddPlantScreen({
         <motion.button
           onClick={handleSave}
           whileTap={{ scale: 0.97 }}
-          className="w-full py-3.5 rounded-2xl bg-primary text-primary-foreground text-sm font-medium flex items-center justify-center gap-2"
+          className="w-full py-4 rounded-2xl bg-primary text-primary-foreground text-sm font-medium flex items-center justify-center gap-2"
         >
           {saved ? (
             <>
-              <Check size={16} /> 已添加！
+              <Check size={18} /> 已添加！
             </>
           ) : (
             "添加植物"
