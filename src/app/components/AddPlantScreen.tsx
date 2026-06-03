@@ -95,7 +95,7 @@ export function AddPlantScreen({
       exit={{ y: "100%" }}
       transition={{ type: "spring", damping: 28, stiffness: 260 }}
       className="absolute inset-0 bg-background z-20 overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden pb-[70px]"
-      style={{ fontFamily: "'DM Sans', sans-serif" }}
+      style={{ fontFamily: "'DM Sans', sans-serif", touchAction: 'pan-y' }}
     >
       {/* Header */}
       <div className="px-5 pt-6 pb-4 flex items-center gap-3 border-b border-border sticky top-0 bg-background z-10">
@@ -167,6 +167,7 @@ export function AddPlantScreen({
           {/* Slider */}
           <div
             className="mb-4 cursor-pointer select-none"
+            style={{ touchAction: 'none' }}
             onMouseDown={(e) => {
               e.preventDefault();
               e.stopPropagation();
@@ -199,6 +200,7 @@ export function AddPlantScreen({
               set("frequency", String(newValue));
 
               const onMove = (e: TouchEvent) => {
+                e.preventDefault();
                 const x = Math.max(0, Math.min(e.touches[0].clientX - rect.left, rect.width));
                 const percent = x / rect.width;
                 const newValue = Math.round(1 + percent * 29);
@@ -241,14 +243,9 @@ export function AddPlantScreen({
                 className={inputClass(errors.frequency)}
               />
             </div>
-            <select
-              value={form.frequencyType}
-              onChange={(e) => setForm((f) => ({ ...f, frequencyType: e.target.value as FrequencyType }))}
-              className="bg-input-background border border-border rounded-xl px-3 py-2.5 text-sm text-foreground outline-none"
-            >
-              <option value="DAYS">天/次</option>
-              <option value="TIMES_PER_DAY">次/天</option>
-            </select>
+            <div className="px-4 py-2.5 text-sm text-muted-foreground">
+              天/次
+            </div>
           </div>
           {errors.frequency && <p className="text-destructive text-xs mt-1">{errors.frequency}</p>}
           <p className="text-muted-foreground text-xs mt-1.5">

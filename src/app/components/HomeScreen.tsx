@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Search, Droplets, Plus, Clock, RefreshCw } from 'lucide-react';
+import { Search, Droplets, Plus, Clock } from 'lucide-react';
 import { Plant, User, daysUntilNextWater, formatLastWatered } from '../api';
 
 function urgencyColor(days: number) {
@@ -97,12 +97,6 @@ export function HomeScreen({
             </h1>
           </div>
           <div className="flex items-center gap-2">
-            <button
-              onClick={onRefresh}
-              className="w-9 h-9 rounded-full bg-card border border-border flex items-center justify-center shadow-sm"
-            >
-              <RefreshCw size={16} className={loading ? 'animate-spin text-muted-foreground' : 'text-muted-foreground'} />
-            </button>
             <button
               onClick={onAddClick}
               className="w-9 h-9 rounded-full bg-primary flex items-center justify-center shadow-sm"
