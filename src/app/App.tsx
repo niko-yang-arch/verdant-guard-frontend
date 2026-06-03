@@ -122,19 +122,14 @@ export default function App() {
               <LoginScreen onLogin={handleLogin} />
             </motion.div>
           ) : (
-            <motion.div
-              key="app"
-              className="min-h-screen relative"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-            >
-              {/* Tab content */}
-              <div className="h-full">
+            <div className="min-h-screen relative">
+              {/* Tab content with bottom padding */}
+              <div className="min-h-screen pb-[70px]">
                 <AnimatePresence mode="wait">
                   {tab === 'home' && (
                     <motion.div
                       key="home"
-                      className="h-full"
+                      className="min-h-screen"
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       exit={{ opacity: 0 }}
@@ -154,7 +149,7 @@ export default function App() {
                   {tab === 'calendar' && (
                     <motion.div
                       key="calendar"
-                      className="h-full"
+                      className="min-h-screen"
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       exit={{ opacity: 0 }}
@@ -166,7 +161,7 @@ export default function App() {
                   {tab === 'profile' && (
                     <motion.div
                       key="profile"
-                      className="h-full"
+                      className="min-h-screen"
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       exit={{ opacity: 0 }}
@@ -203,8 +198,8 @@ export default function App() {
                 )}
               </AnimatePresence>
 
-              {/* Bottom nav */}
-              <div className="absolute bottom-0 left-0 right-0 bg-card/95 border-t border-border backdrop-blur-sm flex items-center pb-6 pt-2 px-2">
+              {/* Bottom nav - fixed at bottom */}
+              <div className="fixed bottom-0 left-0 right-0 z-50 bg-card/95 border-t border-border backdrop-blur-sm flex items-center pb-6 pt-2 px-2">
                 {NAV.map((item) => {
                   const Icon = item.icon;
                   const active = tab === item.id;
@@ -229,7 +224,7 @@ export default function App() {
                   );
                 })}
               </div>
-            </motion.div>
+            </div>
           )}
         </AnimatePresence>
     </div>

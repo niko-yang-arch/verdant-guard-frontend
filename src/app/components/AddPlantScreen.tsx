@@ -94,11 +94,11 @@ export function AddPlantScreen({
       animate={{ y: 0 }}
       exit={{ y: "100%" }}
       transition={{ type: "spring", damping: 28, stiffness: 260 }}
-      className="absolute inset-0 bg-background z-20 overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+      className="absolute inset-0 bg-background z-20 overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden pb-[70px]"
       style={{ fontFamily: "'DM Sans', sans-serif" }}
     >
       {/* Header */}
-      <div className="px-5 pt-12 pb-4 flex items-center gap-3 border-b border-border">
+      <div className="px-5 pt-6 pb-4 flex items-center gap-3 border-b border-border sticky top-0 bg-background z-10">
         <button onClick={onBack} className="p-1.5">
           <ArrowLeft size={20} className="text-foreground" />
         </button>
@@ -110,7 +110,7 @@ export function AddPlantScreen({
         </h1>
       </div>
 
-      <div className="px-5 py-5 space-y-5 pb-24">
+      <div className="px-5 py-5 space-y-5">
         {/* Photo picker */}
         <Field label="植物图片（可选）">
           <div className="space-y-2">
@@ -164,32 +164,73 @@ export function AddPlantScreen({
         </Field>
 
         <Field label="浇水频率 *">
-          {/* Presets */}
-          <div className="grid grid-cols-3 gap-2 mb-3">
-            {FREQ_PRESETS.map((p) => {
-              const active =
-                form.frequency === String(p.frequency) && form.frequencyType === p.type;
-              return (
-                <button
-                  key={p.label}
-                  onClick={() => {
-                    set("frequency", String(p.frequency));
-                    setForm((f) => ({ ...f, frequencyType: p.type }));
-                  }}
-                  className={`py-2 rounded-xl text-sm border transition-colors ${
-                    active
-                      ? "bg-primary text-primary-foreground border-primary"
-                      : "bg-card text-card-foreground border-border"
-                  }`}
-                >
-                  {p.label}
-                </button>
-              );
-            })}
+          {/* Slider */}
+          <div
+            className="mb-4 cursor-pointer select-none"
+            onMouseDown={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              const rect = e.currentTarget.getBoundingClientRect();
+              const x = Math.max(0, Math.min(e.clientX - rect.left, rect.width));
+              const percent = x / rect.width;
+              const newValue = Math.round(1 + percent * 29);
+              set("frequency", String(newValue));
+
+              const onMove = (e: MouseEvent) => {
+                const x = Math.max(0, Math.min(e.clientX - rect.left, rect.width));
+                const percent = x / rect.width;
+                const newValue = Math.round(1 + percent * 29);
+                set("frequency", String(newValue));
+              };
+              const onUp = () => {
+                document.removeEventListener('mousemove', onMove);
+                document.removeEventListener('mouseup', onUp);
+              };
+              document.addEventListener('mousemove', onMove);
+              document.addEventListener('mouseup', onUp);
+            }}
+            onTouchStart={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              const rect = e.currentTarget.getBoundingClientRect();
+              const x = Math.max(0, Math.min(e.touches[0].clientX - rect.left, rect.width));
+              const percent = x / rect.width;
+              const newValue = Math.round(1 + percent * 29);
+              set("frequency", String(newValue));
+
+              const onMove = (e: TouchEvent) => {
+                const x = Math.max(0, Math.min(e.touches[0].clientX - rect.left, rect.width));
+                const percent = x / rect.width;
+                const newValue = Math.round(1 + percent * 29);
+                set("frequency", String(newValue));
+              };
+              const onEnd = () => {
+                document.removeEventListener('touchmove', onMove);
+                document.removeEventListener('touchend', onEnd);
+              };
+              document.addEventListener('touchmove', onMove, { passive: false });
+              document.addEventListener('touchend', onEnd);
+            }}
+          >
+            <div className="relative h-2 bg-secondary rounded-full">
+              <div
+                className="absolute h-full bg-primary rounded-full"
+                style={{ width: `${(parseInt(form.frequency) / 30) * 100}%` }}
+              />
+              <div
+                className="absolute w-5 h-5 bg-white border-2 border-primary rounded-full shadow-md -top-1.5 transition-transform active:scale-110"
+                style={{ left: `calc(${(parseInt(form.frequency) / 30) * 100}% - 10px)` }}
+              />
+            </div>
+          </div>
+          <div className="flex justify-between text-xs text-muted-foreground mt-2">
+            <span>1天</span>
+            <span className="text-primary font-medium">{form.frequency}天</span>
+            <span>30天</span>
           </div>
 
-          {/* Custom */}
-          <div className="flex gap-2 items-center">
+          {/* Type selector */}
+          <div className="flex gap-2 items-center mt-4">
             <div className="flex-1">
               <input
                 type="number"
@@ -216,23 +257,23 @@ export function AddPlantScreen({
               : `每天浇 ${form.frequency || "?"} 次水`}
           </p>
         </Field>
-      </div>
 
-      {/* Save button */}
-      <div className="absolute bottom-0 left-0 right-0 px-5 pb-8 pt-3 bg-background border-t border-border">
-        <motion.button
-          onClick={handleSave}
-          whileTap={{ scale: 0.97 }}
-          className="w-full py-4 rounded-2xl bg-primary text-primary-foreground text-sm font-medium flex items-center justify-center gap-2"
-        >
-          {saved ? (
-            <>
-              <Check size={18} /> 已添加！
-            </>
-          ) : (
-            "添加植物"
-          )}
-        </motion.button>
+        {/* Save button */}
+        <div className="px-5 pb-8 pt-3">
+          <motion.button
+            onClick={handleSave}
+            whileTap={{ scale: 0.97 }}
+            className="w-full py-4 rounded-2xl bg-primary text-primary-foreground text-sm font-medium flex items-center justify-center gap-2"
+          >
+            {saved ? (
+              <>
+                <Check size={18} /> 已添加！
+              </>
+            ) : (
+              "添加植物"
+            )}
+          </motion.button>
+        </div>
       </div>
     </motion.div>
   );
