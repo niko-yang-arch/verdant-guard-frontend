@@ -107,12 +107,8 @@ export default function App() {
 
   return (
     <div
-      className="min-h-screen bg-background overflow-hidden"
-      style={{ 
-        fontFamily: "'DM Sans', sans-serif", 
-        touchAction: 'pan-y',
-        overscrollBehavior: 'none'
-      }}
+      className="min-h-screen bg-background"
+      style={{ fontFamily: "'DM Sans', sans-serif" }}
     >
         <AnimatePresence mode="wait">
           {!loggedIn ? (
@@ -138,7 +134,6 @@ export default function App() {
                       animate={{ opacity: 1 }}
                       exit={{ opacity: 0 }}
                       transition={{ duration: 0.15 }}
-                      style={{ touchAction: 'pan-y', overscrollBehavior: 'none' }}
                     >
                       <HomeScreen
                         plants={plants}
@@ -159,7 +154,6 @@ export default function App() {
                       animate={{ opacity: 1 }}
                       exit={{ opacity: 0 }}
                       transition={{ duration: 0.15 }}
-                      style={{ touchAction: 'pan-y', overscrollBehavior: 'none' }}
                     >
                       <CalendarScreen />
                     </motion.div>
@@ -172,7 +166,6 @@ export default function App() {
                       animate={{ opacity: 1 }}
                       exit={{ opacity: 0 }}
                       transition={{ duration: 0.15 }}
-                      style={{ touchAction: 'pan-y', overscrollBehavior: 'none' }}
                     >
                       <ProfileScreen
                         user={user}
