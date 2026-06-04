@@ -47,12 +47,12 @@ export function ProfileScreen({
 
   return (
     <div
-      className="h-full flex flex-col overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+      className="h-full flex flex-col overflow-hidden"
       style={{ fontFamily: "'DM Sans', sans-serif" }}
     >
-      {/* Profile hero */}
+      {/* Profile hero - fixed */}
       <div
-        className="px-5 pt-14 pb-8 relative"
+        className="px-5 pt-14 pb-8 shrink-0 relative"
         style={{ background: 'linear-gradient(160deg, #1a3a1a 0%, #2d6a2d 100%)' }}
       >
         <div className="flex items-center gap-4">
@@ -93,8 +93,8 @@ export function ProfileScreen({
         </div>
       </div>
 
-      {/* Menu groups */}
-      <div className="px-5 py-4 space-y-3 pb-28">
+      {/* Scrollable menu */}
+      <div className="flex-1 overflow-y-auto overflow-x-hidden px-5 py-4 space-y-3 pb-28 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         <div className="bg-card border border-border rounded-2xl overflow-hidden">
           <MenuItem icon={<User size={16} />} label="编辑个人资料" />
           <MenuItem icon={<Bell size={16} />} label="浇水提醒通知" value="已开启" />

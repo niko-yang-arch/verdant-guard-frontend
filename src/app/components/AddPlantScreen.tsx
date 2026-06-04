@@ -94,8 +94,8 @@ export function AddPlantScreen({
       animate={{ y: 0 }}
       exit={{ y: "100%" }}
       transition={{ type: "spring", damping: 28, stiffness: 260 }}
-      className="absolute inset-0 bg-background z-20 overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden pb-[70px]"
-      style={{ fontFamily: "'DM Sans', sans-serif", overscrollBehavior: 'none' }}
+      className="absolute inset-0 bg-background z-20 overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+      style={{ fontFamily: "'DM Sans', sans-serif" }}
     >
       {/* Header */}
       <div className="px-5 pt-6 pb-4 flex items-center gap-3 border-b border-border sticky top-0 bg-background z-10">

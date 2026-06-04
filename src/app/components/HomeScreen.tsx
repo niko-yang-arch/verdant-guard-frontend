@@ -81,7 +81,7 @@ export function HomeScreen({
   const greet = greetHour < 12 ? '早安' : greetHour < 18 ? '下午好' : '晚上好';
 
   return (
-    <div className="h-full flex flex-col" style={{ fontFamily: "'DM Sans', sans-serif" }}>
+    <div className="h-full flex flex-col overflow-hidden" style={{ fontFamily: "'DM Sans', sans-serif" }}>
       {/* Header */}
       <div className="px-5 pt-12 pb-3 shrink-0">
         <div className="flex items-center justify-between mb-1">
@@ -118,7 +118,8 @@ export function HomeScreen({
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto px-5 pb-24 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden space-y-4">
+      {/* Scrollable content */}
+      <div className="flex-1 overflow-y-auto overflow-x-hidden px-5 pb-24 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden space-y-4">
         {/* Error banner */}
         {error && (
           <motion.div

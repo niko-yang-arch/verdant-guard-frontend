@@ -107,14 +107,14 @@ export default function App() {
 
   return (
     <div
-      className="min-h-screen bg-background"
-      style={{ fontFamily: "'DM Sans', sans-serif", overscrollBehavior: 'none' }}
+      className="h-screen bg-background overflow-hidden"
+      style={{ fontFamily: "'DM Sans', sans-serif" }}
     >
         <AnimatePresence mode="wait">
           {!loggedIn ? (
             <motion.div
               key="login"
-              className="min-h-screen"
+              className="h-full"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
@@ -122,14 +122,14 @@ export default function App() {
               <LoginScreen onLogin={handleLogin} />
             </motion.div>
           ) : (
-            <div className="min-h-screen relative">
-              {/* Tab content with bottom padding */}
-              <div className="min-h-screen pb-[70px]">
+            <div className="h-full flex flex-col">
+              {/* Tab content - 直接在这里设置滚动 */}
+              <div className="flex-1 overflow-hidden">
                 <AnimatePresence mode="wait">
                   {tab === 'home' && (
                     <motion.div
                       key="home"
-                      className="min-h-screen"
+                      className="h-full"
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       exit={{ opacity: 0 }}
@@ -149,7 +149,7 @@ export default function App() {
                   {tab === 'calendar' && (
                     <motion.div
                       key="calendar"
-                      className="min-h-screen"
+                      className="h-full"
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       exit={{ opacity: 0 }}
@@ -161,7 +161,7 @@ export default function App() {
                   {tab === 'profile' && (
                     <motion.div
                       key="profile"
-                      className="min-h-screen"
+                      className="h-full"
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       exit={{ opacity: 0 }}
@@ -178,28 +178,8 @@ export default function App() {
                 </AnimatePresence>
               </div>
 
-              {/* Overlays */}
-              <AnimatePresence>
-                {selectedPlant && (
-                  <DetailScreen
-                    key="detail"
-                    plant={selectedPlant}
-                    onBack={() => setSelectedPlant(null)}
-                    onDelete={handleDelete}
-                    onWater={handleWater}
-                  />
-                )}
-                {showAdd && (
-                  <AddPlantScreen
-                    key="add"
-                    onBack={() => setShowAdd(false)}
-                    onSave={handleAddPlant}
-                  />
-                )}
-              </AnimatePresence>
-
-              {/* Bottom nav - fixed at bottom */}
-              <div className="fixed bottom-0 left-0 right-0 z-50 bg-card/95 border-t border-border backdrop-blur-sm flex items-center pb-6 pt-2 px-2">
+              {/* Bottom nav */}
+              <div className="shrink-0 z-50 bg-card/95 border-t border-border backdrop-blur-sm flex items-center pb-6 pt-2 px-2">
                 {NAV.map((item) => {
                   const Icon = item.icon;
                   const active = tab === item.id;
@@ -224,6 +204,26 @@ export default function App() {
                   );
                 })}
               </div>
+
+              {/* Overlays */}
+              <AnimatePresence>
+                {selectedPlant && (
+                  <DetailScreen
+                    key="detail"
+                    plant={selectedPlant}
+                    onBack={() => setSelectedPlant(null)}
+                    onDelete={handleDelete}
+                    onWater={handleWater}
+                  />
+                )}
+                {showAdd && (
+                  <AddPlantScreen
+                    key="add"
+                    onBack={() => setShowAdd(false)}
+                    onSave={handleAddPlant}
+                  />
+                )}
+              </AnimatePresence>
             </div>
           )}
         </AnimatePresence>
