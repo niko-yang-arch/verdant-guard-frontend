@@ -48,7 +48,7 @@ export function ProfileScreen({
   return (
     <div
       className="h-full flex flex-col overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-      style={{ fontFamily: "'DM Sans', sans-serif", overscrollBehavior: 'none' }}
+      style={{ fontFamily: "'DM Sans', sans-serif" }}
     >
       {/* Profile hero */}
       <div

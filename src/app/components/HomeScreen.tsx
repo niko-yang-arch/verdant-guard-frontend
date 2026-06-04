@@ -118,7 +118,7 @@ export function HomeScreen({
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto px-5 pb-24 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden space-y-4" style={{ overscrollBehavior: 'none' }}>
+      <div className="flex-1 overflow-y-auto px-5 pb-24 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden space-y-4">
         {/* Error banner */}
         {error && (
           <motion.div
