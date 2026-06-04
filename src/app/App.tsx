@@ -108,7 +108,7 @@ export default function App() {
   return (
     <div
       className="min-h-screen bg-background"
-      style={{ fontFamily: "'DM Sans', sans-serif" }}
+      style={{ fontFamily: "'DM Sans', sans-serif", overscrollBehavior: 'none' }}
     >
         <AnimatePresence mode="wait">
           {!loggedIn ? (

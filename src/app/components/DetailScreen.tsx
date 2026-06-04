@@ -63,7 +63,7 @@ export function DetailScreen({
       exit={{ x: '100%' }}
       transition={{ type: 'spring', damping: 26, stiffness: 260 }}
       className="absolute inset-0 bg-background z-20 overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-      style={{ fontFamily: "'DM Sans', sans-serif", touchAction: 'pan-y' }}
+      style={{ fontFamily: "'DM Sans', sans-serif", overscrollBehavior: 'none' }}
     >
       {/* Hero image */}
       <div className="relative h-60 shrink-0">
