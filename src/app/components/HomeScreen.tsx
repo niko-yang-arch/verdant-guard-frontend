@@ -81,7 +81,7 @@ export function HomeScreen({
   const greet = greetHour < 12 ? '早安' : greetHour < 18 ? '下午好' : '晚上好';
 
   return (
-    <div className="h-full flex flex-col" style={{ fontFamily: "'DM Sans', sans-serif", touchAction: 'pan-y' }}>
+    <div className="h-full flex flex-col" style={{ fontFamily: "'DM Sans', sans-serif", touchAction: 'pan-y', overscrollBehavior: 'none' }}>
       {/* Header */}
       <div className="px-5 pt-12 pb-3 shrink-0">
         <div className="flex items-center justify-between mb-1">

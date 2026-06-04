@@ -55,7 +55,7 @@ export function CalendarScreen() {
   const totalPlants = new Set(Object.values(calData).flatMap((ps) => ps.map((p) => p.id))).size;
 
   return (
-    <div className="h-full flex flex-col" style={{ fontFamily: "'DM Sans', sans-serif", touchAction: 'pan-y' }}>
+    <div className="h-full flex flex-col" style={{ fontFamily: "'DM Sans', sans-serif", touchAction: 'pan-y', overscrollBehavior: 'none' }}>
       {/* Header */}
       <div className="px-5 pt-12 pb-4 shrink-0">
         <h1
