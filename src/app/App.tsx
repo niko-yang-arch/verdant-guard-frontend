@@ -1,13 +1,14 @@
 import { useState, useEffect, useCallback } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import { Home, CalendarDays, User } from 'lucide-react';
-import { Plant, User as UserType, daysUntilNextWater, authLogin, authMe, getPlantList, addWaterLog, deletePlant, addPlant as apiAddPlant } from './api';
+import { Plant, User as UserType, daysUntilNextWater, authLogin, authMe, getPlantList, addWaterLog, deletePlant, addPlant as apiAddPlant, updatePlant } from './api';
 import { LoginScreen } from './components/LoginScreen';
 import { HomeScreen } from './components/HomeScreen';
 import { DetailScreen } from './components/DetailScreen';
 import { AddPlantScreen } from './components/AddPlantScreen';
 import { CalendarScreen } from './components/CalendarScreen';
 import { ProfileScreen } from './components/ProfileScreen';
+import { EditPlantScreen } from './components/EditPlantScreen';
 
 type Tab = 'home' | 'calendar' | 'profile';
 
@@ -24,6 +25,7 @@ export default function App() {
   const [user, setUser] = useState<UserType | null>(null);
   const [selectedPlant, setSelectedPlant] = useState<Plant | null>(null);
   const [showAdd, setShowAdd] = useState(false);
+  const [editingPlant, setEditingPlant] = useState<Plant | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -103,12 +105,29 @@ export default function App() {
     }
   };
 
+  const handleEditPlant = async (id: number, data: { name: string; species: string; frequency: number; frequencyType: 'DAYS' | 'TIMES_PER_DAY'; image?: string }) => {
+    try {
+      const updatedPlant = await updatePlant(id, data);
+      setPlants((ps) => ps.map((p) => (p.id === id ? updatedPlant : p)));
+      if (selectedPlant?.id === id) {
+        setSelectedPlant(updatedPlant);
+      }
+      setEditingPlant(null);
+    } catch (e: any) {
+      alert('修改失败: ' + e.message);
+    }
+  };
+
   const totalWatered = plants.reduce((s, p) => s + p.historyCount, 0);
 
   return (
     <div
       className="h-screen bg-background overflow-hidden"
-      style={{ fontFamily: "'DM Sans', sans-serif" }}
+      style={{ 
+        fontFamily: "'DM Sans', sans-serif",
+        touchAction: 'pan-y',
+        overscrollBehavior: 'contain'
+      }}
     >
         <AnimatePresence mode="wait">
           {!loggedIn ? (
@@ -214,6 +233,7 @@ export default function App() {
                     onBack={() => setSelectedPlant(null)}
                     onDelete={handleDelete}
                     onWater={handleWater}
+                    onEdit={setEditingPlant}
                   />
                 )}
                 {showAdd && (
@@ -221,6 +241,14 @@ export default function App() {
                     key="add"
                     onBack={() => setShowAdd(false)}
                     onSave={handleAddPlant}
+                  />
+                )}
+                {editingPlant && (
+                  <EditPlantScreen
+                    key="edit"
+                    plant={editingPlant}
+                    onBack={() => setEditingPlant(null)}
+                    onSave={(data) => handleEditPlant(editingPlant.id, data)}
                   />
                 )}
               </AnimatePresence>

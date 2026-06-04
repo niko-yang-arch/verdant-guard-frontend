@@ -25,11 +25,13 @@ export function DetailScreen({
   onBack,
   onDelete,
   onWater,
+  onEdit,
 }: {
   plant: Plant;
   onBack: () => void;
   onDelete: (id: number) => void;
   onWater: (plantId: number) => void;
+  onEdit: (plant: Plant) => void;
 }) {
   const [watered, setWatered] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -48,6 +50,14 @@ export function DetailScreen({
   const handleWater = () => {
     setWatered(true);
     onWater(plant.id);
+    
+    const newLog: WaterLog = {
+      id: Date.now(),
+      plantId: plant.id,
+      date: new Date().toISOString(),
+    };
+    setHistory((prev) => [newLog, ...prev]);
+    
     setTimeout(() => setWatered(false), 2500);
   };
 
@@ -62,8 +72,8 @@ export function DetailScreen({
       animate={{ x: 0 }}
       exit={{ x: '100%' }}
       transition={{ type: 'spring', damping: 26, stiffness: 260 }}
-      className="absolute inset-0 bg-background z-20 overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-      style={{ fontFamily: "'DM Sans', sans-serif" }}
+      className="absolute inset-0 bg-background z-50 overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+      style={{ fontFamily: "'DM Sans', sans-serif", touchAction: 'pan-y', overscrollBehavior: 'contain' }}
     >
       {/* Hero image */}
       <div className="relative h-60 shrink-0">
@@ -83,7 +93,10 @@ export function DetailScreen({
         >
           <ArrowLeft size={18} />
         </button>
-        <button className="absolute top-12 right-4 p-2 rounded-full bg-black/30 text-white backdrop-blur-sm">
+        <button
+          onClick={() => onEdit(plant)}
+          className="absolute top-12 right-4 p-2 rounded-full bg-black/30 text-white backdrop-blur-sm"
+        >
           <Edit3 size={18} />
         </button>
         <div className="absolute bottom-4 left-4">

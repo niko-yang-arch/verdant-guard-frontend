@@ -119,7 +119,10 @@ export function HomeScreen({
       </div>
 
       {/* Scrollable content */}
-      <div className="flex-1 overflow-y-auto overflow-x-hidden px-5 pb-24 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden space-y-4">
+      <div 
+        className="flex-1 overflow-y-auto overflow-x-hidden px-5 pb-24 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden space-y-4"
+        style={{ touchAction: 'pan-y', overscrollBehavior: 'contain' }}
+      >
         {/* Error banner */}
         {error && (
           <motion.div

@@ -38,19 +38,21 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
   );
 }
 
-export function AddPlantScreen({
+export function EditPlantScreen({
+  plant,
   onBack,
   onSave,
 }: {
+  plant: Plant;
   onBack: () => void;
   onSave: (plant: Omit<Plant, "id" | "createdAt" | "historyCount" | "lastWatered">) => void;
 }) {
   const [form, setForm] = useState<FormData>({
-    name: "",
-    species: "",
-    frequency: "7",
-    frequencyType: "DAYS",
-    image: "",
+    name: plant.name,
+    species: plant.species,
+    frequency: String(plant.frequency),
+    frequencyType: plant.frequencyType,
+    image: plant.image || "",
   });
   const [saved, setSaved] = useState(false);
   const [errors, setErrors] = useState<Partial<Record<keyof FormData, string>>>({});
@@ -106,7 +108,7 @@ export function AddPlantScreen({
           className="flex-1 text-foreground"
           style={{ fontFamily: "'DM Serif Display', serif", fontSize: "1.3rem" }}
         >
-          添加新植物
+          编辑植物
         </h1>
       </div>
 
@@ -264,10 +266,10 @@ export function AddPlantScreen({
           >
             {saved ? (
               <>
-                <Check size={18} /> 已添加！
+                <Check size={18} /> 已保存！
               </>
             ) : (
-              "添加植物"
+              "保存修改"
             )}
           </motion.button>
         </div>

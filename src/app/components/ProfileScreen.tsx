@@ -94,7 +94,10 @@ export function ProfileScreen({
       </div>
 
       {/* Scrollable menu */}
-      <div className="flex-1 overflow-y-auto overflow-x-hidden px-5 py-4 space-y-3 pb-28 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+      <div 
+        className="flex-1 overflow-y-auto overflow-x-hidden px-5 py-4 space-y-3 pb-28 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        style={{ touchAction: 'pan-y', overscrollBehavior: 'contain' }}
+      >
         <div className="bg-card border border-border rounded-2xl overflow-hidden">
           <MenuItem icon={<User size={16} />} label="编辑个人资料" />
           <MenuItem icon={<Bell size={16} />} label="浇水提醒通知" value="已开启" />
