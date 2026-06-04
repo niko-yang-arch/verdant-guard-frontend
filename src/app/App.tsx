@@ -110,7 +110,7 @@ export default function App() {
       className="min-h-screen bg-background overflow-hidden"
       style={{ 
         fontFamily: "'DM Sans', sans-serif", 
-        touchAction: 'none',
+        touchAction: 'pan-y',
         overscrollBehavior: 'none'
       }}
     >
