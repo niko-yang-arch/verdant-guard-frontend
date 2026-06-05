@@ -40,6 +40,32 @@ export function DetailScreen({
   const [loadingHistory, setLoadingHistory] = useState(false);
   const days = daysUntilNextWater(plant);
 
+  // 计算今天已浇水的次数（用于 TIMES_PER_DAY 类型）
+  const todayCount = (() => {
+    const now = new Date();
+    const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0);
+    const todayEnd = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59);
+    return history.filter((log) => {
+      const logDate = new Date(log.date);
+      return logDate >= todayStart && logDate <= todayEnd;
+    }).length;
+  })();
+
+  // 浇水状态文案
+  const waterStatusText = (() => {
+    if (plant.frequencyType === 'TIMES_PER_DAY') {
+      if (todayCount >= plant.frequency) {
+        return '今天已浇完';
+      }
+      const remaining = plant.frequency - todayCount;
+      return `今天还需浇 ${remaining} 次`;
+    }
+    return days === 0 ? '今天需要浇水！' : days === 1 ? '明天需要浇水' : `还有 ${days} 天浇水`;
+  })();
+
+  // 浇水状态颜色
+  const isNeedWater = plant.frequencyType === 'TIMES_PER_DAY' ? todayCount < plant.frequency : days === 0;
+
   useEffect(() => {
     setLoadingHistory(true);
     getPlantInfo(plant.id)
@@ -167,22 +193,22 @@ export function DetailScreen({
         <div
           className="rounded-2xl p-4 flex items-center gap-4"
           style={{
-            background: days === 0 ? '#fef3f0' : '#f0faf0',
-            border: `1px solid ${days === 0 ? '#fad4c8' : '#c6e8c6'}`,
+            background: isNeedWater ? '#fef3f0' : '#f0faf0',
+            border: `1px solid ${isNeedWater ? '#fad4c8' : '#c6e8c6'}`,
           }}
         >
           <div
             className="w-12 h-12 rounded-full flex items-center justify-center text-2xl"
-            style={{ background: days === 0 ? '#fde0d8' : '#d9f2d9' }}
+            style={{ background: isNeedWater ? '#fde0d8' : '#d9f2d9' }}
           >
             💧
           </div>
           <div>
             <p
               className="font-medium text-sm"
-              style={{ color: days === 0 ? '#c0392b' : '#2d6a2d' }}
+              style={{ color: isNeedWater ? '#c0392b' : '#2d6a2d' }}
             >
-              {days === 0 ? '今天需要浇水！' : days === 1 ? '明天需要浇水' : `还有 ${days} 天浇水`}
+              {waterStatusText}
             </p>
             <p className="text-muted-foreground text-xs mt-0.5">{freqLabel}</p>
           </div>
