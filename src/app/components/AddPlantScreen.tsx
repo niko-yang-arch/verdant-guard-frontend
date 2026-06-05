@@ -251,7 +251,7 @@ export function AddPlantScreen({
                 className="absolute h-full bg-primary rounded-full"
                 style={{
                   width: form.frequencyType === "TIMES_PER_DAY"
-                    ? `${((parseInt(form.frequency) - 1.8) / 10.2) * 100}%`
+                    ? `${((parseInt(form.frequency) - 1.6) / 10.4) * 100}%`
                     : `${(parseInt(form.frequency) / 30) * 100}%`
                 }}
               />
@@ -259,7 +259,7 @@ export function AddPlantScreen({
                 className="absolute w-5 h-5 bg-white border-2 border-primary rounded-full shadow-md -top-1.5 transition-transform active:scale-110"
                 style={{
                   left: form.frequencyType === "TIMES_PER_DAY"
-                    ? `calc(${((parseInt(form.frequency) - 1.8) / 10.2) * 100}% - 10px)`
+                    ? `calc(${((parseInt(form.frequency) - 1.6) / 10.4) * 100}% - 10px)`
                     : `calc(${(parseInt(form.frequency) / 30) * 100}% - 10px)`
                 }}
               />
