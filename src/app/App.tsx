@@ -78,12 +78,12 @@ export default function App() {
     setPlants((ps) =>
       ps.map((p) =>
         p.id === plantId
-          ? { ...p, lastWatered: new Date().toISOString(), historyCount: p.historyCount + 1 }
+          ? { ...p, lastWatered: new Date().toISOString(), historyCount: p.historyCount + 1, todayCount: (p.todayCount ?? 0) + 1 }
           : p
       )
     );
     if (selectedPlant?.id === plantId) {
-      setSelectedPlant((p) => p ? { ...p, lastWatered: new Date().toISOString(), historyCount: p.historyCount + 1 } : null);
+      setSelectedPlant((p) => p ? { ...p, lastWatered: new Date().toISOString(), historyCount: p.historyCount + 1, todayCount: (p.todayCount ?? 0) + 1 } : null);
     }
   };
 
