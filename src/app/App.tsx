@@ -112,7 +112,11 @@ export default function App() {
 
   const handleEditPlant = async (id: number, data: { name: string; species: string; frequency: number; frequencyType: 'DAYS' | 'TIMES_PER_DAY'; image?: string }) => {
     try {
-      const updatedPlant = await updatePlant(id, data);
+      let updatedPlant = await updatePlant(id, data);
+      if (updatedPlant.historyCount === undefined || updatedPlant.historyCount === null) {
+        const original = plants.find(p => p.id === id);
+        updatedPlant = { ...updatedPlant, historyCount: original?.historyCount || 0 };
+      }
       setPlants((ps) => ps.map((p) => (p.id === id ? updatedPlant : p)));
       if (selectedPlant?.id === id) {
         setSelectedPlant(updatedPlant);
