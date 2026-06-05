@@ -48,7 +48,7 @@ export function AddPlantScreen({
   const [form, setForm] = useState<FormData>({
     name: "",
     species: "",
-    frequency: "7",
+    frequency: "1",
     frequencyType: "DAYS",
     image: "",
   });
