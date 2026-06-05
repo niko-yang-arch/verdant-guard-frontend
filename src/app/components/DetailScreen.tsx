@@ -50,13 +50,51 @@ export function DetailScreen({
 
   const handleWater = async () => {
     if (watering) return;
-    
+
+    // 获取今天的开始和结束时间
+    const now = new Date();
+    const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0);
+    const todayEnd = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59);
+
+    // 统计今天已浇水的次数
+    const todayLogs = history.filter((log) => {
+      const logDate = new Date(log.date);
+      return logDate >= todayStart && logDate <= todayEnd;
+    });
+
+    // 根据频率类型判断是否超出限制
+    if (plant.frequencyType === 'TIMES_PER_DAY') {
+      // 每天浇水N次：检查今天浇水次数是否已达到上限
+      if (todayLogs.length >= plant.frequency) {
+        alert(`每天最多只能浇水 ${plant.frequency} 次，今天的浇水次数已用完~`);
+        return;
+      }
+    } else {
+      // 每N天浇水一次：检查今天是否已浇过水
+      if (todayLogs.length > 0) {
+        alert('今天已经浇过水了，请明天再来吧~');
+        return;
+      }
+      // 检查是否到了浇水时间
+      if (plant.lastWatered) {
+        const lastWateredDate = new Date(plant.lastWatered);
+        const lastWateredDay = new Date(lastWateredDate.getFullYear(), lastWateredDate.getMonth(), lastWateredDate.getDate());
+        const todayDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        const daysSinceLastWater = Math.floor((todayDay.getTime() - lastWateredDay.getTime()) / 86400000);
+        if (daysSinceLastWater < plant.frequency) {
+          const remaining = plant.frequency - daysSinceLastWater;
+          alert(`还没到浇水时间，还有 ${remaining} 天才能浇水~`);
+          return;
+        }
+      }
+    }
+
     try {
       setWatering(true);
-      
-      // 先调用后端接口，检查是否可以浇水
+
+      // 先调用后端接口，二次校验
       await onWater(plant.id);
-      
+
       // 后端成功后再更新本地状态
       setWatered(true);
       const newLog: WaterLog = {
@@ -65,10 +103,9 @@ export function DetailScreen({
         date: new Date().toISOString(),
       };
       setHistory((prev) => [newLog, ...prev]);
-      
+
       setTimeout(() => setWatered(false), 2500);
     } catch (e: any) {
-      // 显示后端返回的错误信息
       alert(e.message || '浇水失败');
       setWatered(false);
     } finally {
