@@ -53,9 +53,12 @@ export function DetailScreen({
     
     try {
       setWatering(true);
-      setWatered(true);
       
-      // 先更新本地状态（乐观更新）
+      // 先调用后端接口，检查是否可以浇水
+      await onWater(plant.id);
+      
+      // 后端成功后再更新本地状态
+      setWatered(true);
       const newLog: WaterLog = {
         id: Date.now(),
         plantId: plant.id,
@@ -63,15 +66,11 @@ export function DetailScreen({
       };
       setHistory((prev) => [newLog, ...prev]);
       
-      // 等待后端响应
-      await onWater(plant.id);
-      
       setTimeout(() => setWatered(false), 2500);
     } catch (e: any) {
-      // 失败时回滚本地状态
-      setHistory((prev) => prev.filter((h) => h.id !== Date.now()));
+      // 显示后端返回的错误信息
+      alert(e.message || '浇水失败');
       setWatered(false);
-      // 这里的错误处理在App.tsx中已经有alert了
     } finally {
       setWatering(false);
     }

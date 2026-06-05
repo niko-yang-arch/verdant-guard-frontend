@@ -74,20 +74,16 @@ export default function App() {
   };
 
   const handleWater = async (plantId: number) => {
-    try {
-      await addWaterLog(plantId);
-      setPlants((ps) =>
-        ps.map((p) =>
-          p.id === plantId
-            ? { ...p, lastWatered: new Date().toISOString(), historyCount: p.historyCount + 1 }
-            : p
-        )
-      );
-      if (selectedPlant?.id === plantId) {
-        setSelectedPlant((p) => p ? { ...p, lastWatered: new Date().toISOString(), historyCount: p.historyCount + 1 } : null);
-      }
-    } catch (e: any) {
-      alert('浇水失败: ' + e.message);
+    await addWaterLog(plantId);
+    setPlants((ps) =>
+      ps.map((p) =>
+        p.id === plantId
+          ? { ...p, lastWatered: new Date().toISOString(), historyCount: p.historyCount + 1 }
+          : p
+      )
+    );
+    if (selectedPlant?.id === plantId) {
+      setSelectedPlant((p) => p ? { ...p, lastWatered: new Date().toISOString(), historyCount: p.historyCount + 1 } : null);
     }
   };
 
