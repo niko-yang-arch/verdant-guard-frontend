@@ -164,6 +164,34 @@ export function AddPlantScreen({
         </Field>
 
         <Field label="浇水频率 *">
+          {/* Tab selector */}
+          <div className="flex gap-2 mb-4 p-1 bg-secondary rounded-xl">
+            <button
+              type="button"
+              onClick={() => {
+                set("frequencyType", "DAYS");
+                set("frequency", "7");
+              }}
+              className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all ${
+                form.frequencyType === "DAYS" ? "bg-white text-primary shadow-sm" : "text-muted-foreground"
+              }`}
+            >
+              单次/多天一次
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                set("frequencyType", "TIMES_PER_DAY");
+                set("frequency", "2");
+              }}
+              className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all ${
+                form.frequencyType === "TIMES_PER_DAY" ? "bg-white text-primary shadow-sm" : "text-muted-foreground"
+              }`}
+            >
+              一天多次
+            </button>
+          </div>
+
           {/* Slider */}
           <div
             className="mb-4 cursor-pointer select-none"
@@ -174,13 +202,15 @@ export function AddPlantScreen({
               const rect = e.currentTarget.getBoundingClientRect();
               const x = Math.max(0, Math.min(e.clientX - rect.left, rect.width));
               const percent = x / rect.width;
-              const newValue = Math.round(1 + percent * 29);
+              const maxVal = form.frequencyType === "TIMES_PER_DAY" ? 12 : 30;
+              const minVal = form.frequencyType === "TIMES_PER_DAY" ? 1 : 1;
+              const newValue = Math.round(minVal + percent * (maxVal - minVal));
               set("frequency", String(newValue));
 
               const onMove = (e: MouseEvent) => {
                 const x = Math.max(0, Math.min(e.clientX - rect.left, rect.width));
                 const percent = x / rect.width;
-                const newValue = Math.round(1 + percent * 29);
+                const newValue = Math.round(minVal + percent * (maxVal - minVal));
                 set("frequency", String(newValue));
               };
               const onUp = () => {
@@ -196,14 +226,16 @@ export function AddPlantScreen({
               const rect = e.currentTarget.getBoundingClientRect();
               const x = Math.max(0, Math.min(e.touches[0].clientX - rect.left, rect.width));
               const percent = x / rect.width;
-              const newValue = Math.round(1 + percent * 29);
+              const maxVal = form.frequencyType === "TIMES_PER_DAY" ? 12 : 30;
+              const minVal = form.frequencyType === "TIMES_PER_DAY" ? 1 : 1;
+              const newValue = Math.round(minVal + percent * (maxVal - minVal));
               set("frequency", String(newValue));
 
               const onMove = (e: TouchEvent) => {
                 e.preventDefault();
                 const x = Math.max(0, Math.min(e.touches[0].clientX - rect.left, rect.width));
                 const percent = x / rect.width;
-                const newValue = Math.round(1 + percent * 29);
+                const newValue = Math.round(minVal + percent * (maxVal - minVal));
                 set("frequency", String(newValue));
               };
               const onEnd = () => {
@@ -214,21 +246,33 @@ export function AddPlantScreen({
               document.addEventListener('touchend', onEnd);
             }}
           >
-            <div className="relative h-2 bg-secondary rounded-full">
+            <div className="relative h-2 bg-white rounded-full">
               <div
                 className="absolute h-full bg-primary rounded-full"
-                style={{ width: `${(parseInt(form.frequency) / 30) * 100}%` }}
+                style={{
+                  width: form.frequencyType === "TIMES_PER_DAY"
+                    ? `${((parseInt(form.frequency) - 1) / 11) * 100}%`
+                    : `${(parseInt(form.frequency) / 30) * 100}%`
+                }}
               />
               <div
                 className="absolute w-5 h-5 bg-white border-2 border-primary rounded-full shadow-md -top-1.5 transition-transform active:scale-110"
-                style={{ left: `calc(${(parseInt(form.frequency) / 30) * 100}% - 10px)` }}
+                style={{
+                  left: form.frequencyType === "TIMES_PER_DAY"
+                    ? `calc(${((parseInt(form.frequency) - 1) / 11) * 100}% - 10px)`
+                    : `calc(${(parseInt(form.frequency) / 30) * 100}% - 10px)`
+                }}
               />
             </div>
           </div>
           <div className="flex justify-between text-xs text-muted-foreground mt-2">
-            <span>1天</span>
-            <span className="text-primary font-medium">{form.frequency}天</span>
-            <span>30天</span>
+            <span>{form.frequencyType === "TIMES_PER_DAY" ? "1次" : "1天"}</span>
+            <span className="text-primary font-medium">
+              {form.frequencyType === "TIMES_PER_DAY"
+                ? `每天 ${form.frequency} 次`
+                : `每 ${form.frequency} 天`}
+            </span>
+            <span>{form.frequencyType === "TIMES_PER_DAY" ? "12次" : "30天"}</span>
           </div>
 
           {/* Type selector */}
@@ -239,19 +283,19 @@ export function AddPlantScreen({
                 value={form.frequency}
                 onChange={(e) => set("frequency", e.target.value)}
                 min={1}
-                max={365}
+                max={form.frequencyType === "TIMES_PER_DAY" ? 12 : 365}
                 className={inputClass(errors.frequency)}
               />
             </div>
             <div className="px-4 py-2.5 text-sm text-muted-foreground">
-              天/次
+              {form.frequencyType === "TIMES_PER_DAY" ? "次/天" : "天/次"}
             </div>
           </div>
           {errors.frequency && <p className="text-destructive text-xs mt-1">{errors.frequency}</p>}
           <p className="text-muted-foreground text-xs mt-1.5">
-            {form.frequencyType === "DAYS"
-              ? `每 ${form.frequency || "?"} 天浇一次水`
-              : `每天浇 ${form.frequency || "?"} 次水`}
+            {form.frequencyType === "TIMES_PER_DAY"
+              ? `每天浇 ${form.frequency || "?"} 次水`
+              : `每 ${form.frequency || "?"} 天浇一次水`}
           </p>
         </Field>
 
