@@ -184,7 +184,7 @@ export function EditPlantScreen({
               type="button"
               onClick={() => {
                 set("frequencyType", "TIMES_PER_DAY");
-                set("frequency", "2");
+                set("frequency", "3");
               }}
               className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all ${
                 form.frequencyType === "TIMES_PER_DAY" ? "bg-white text-primary shadow-sm" : "text-muted-foreground"
