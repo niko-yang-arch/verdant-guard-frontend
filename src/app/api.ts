@@ -158,7 +158,10 @@ export function daysUntilNextWater(plant: Plant): number {
   if (!plant.lastWatered) return 0;
   if (plant.frequencyType === 'TIMES_PER_DAY') return 0;
   const last = new Date(plant.lastWatered).getTime();
-  const next = last + plant.frequency * 86400000;
+  // "每N天浇一次" = 浇水日 + 间隔(N-1)天 = 下次浇水日
+  // frequency=1 时仍然间隔1天（每天浇水，明天再浇）
+  const interval = plant.frequency === 1 ? 1 : plant.frequency - 1;
+  const next = last + interval * 86400000;
   const diff = Math.ceil((next - Date.now()) / 86400000);
   return Math.max(0, diff);
 }
