@@ -3,6 +3,14 @@ import { motion, AnimatePresence } from 'motion/react';
 import { Search, Droplets, Plus, Clock } from 'lucide-react';
 import { Plant, User, daysUntilNextWater, formatLastWatered } from '../api';
 
+function needsWateringToday(plant: Plant): boolean {
+  const todayCount = plant.todayCount ?? 0;
+  if (plant.frequencyType === 'TIMES_PER_DAY') {
+    return todayCount < plant.frequency;
+  }
+  return daysUntilNextWater(plant) === 0 && todayCount === 0;
+}
+
 function urgencyColor(days: number) {
   if (days === 0) return '#e85d3a';
   if (days === 1) return '#f0a050';
@@ -71,7 +79,7 @@ export function HomeScreen({
 }) {
   const [query, setQuery] = useState('');
 
-  const urgent = plants.filter((p) => daysUntilNextWater(p) === 0);
+  const urgent = plants.filter((p) => needsWateringToday(p));
   const filtered = plants.filter(
     (p) =>
       p.name.includes(query) || p.species.toLowerCase().includes(query.toLowerCase())

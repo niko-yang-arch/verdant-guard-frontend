@@ -49,6 +49,7 @@ export interface Plant {
   lastWatered: string | null;
   createdAt: string;
   historyCount: number;
+  todayCount?: number;
 }
 
 export interface PlantDetail extends Plant {
