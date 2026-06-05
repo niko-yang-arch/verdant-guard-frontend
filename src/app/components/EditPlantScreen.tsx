@@ -184,7 +184,7 @@ export function EditPlantScreen({
               type="button"
               onClick={() => {
                 set("frequencyType", "TIMES_PER_DAY");
-                set("frequency", "3");
+                set("frequency", "2");
               }}
               className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all ${
                 form.frequencyType === "TIMES_PER_DAY" ? "bg-white text-primary shadow-sm" : "text-muted-foreground"
@@ -253,7 +253,7 @@ export function EditPlantScreen({
                 className="absolute h-full bg-primary rounded-full"
                 style={{
                   width: form.frequencyType === "TIMES_PER_DAY"
-                    ? `${((parseInt(form.frequency) - 2) / 10) * 100}%`
+                    ? `${((parseInt(form.frequency) - 1.8) / 10.2) * 100}%`
                     : `${(parseInt(form.frequency) / 30) * 100}%`
                 }}
               />
@@ -261,7 +261,7 @@ export function EditPlantScreen({
                 className="absolute w-5 h-5 bg-white border-2 border-primary rounded-full shadow-md -top-1.5 transition-transform active:scale-110"
                 style={{
                   left: form.frequencyType === "TIMES_PER_DAY"
-                    ? `calc(${((parseInt(form.frequency) - 2) / 10) * 100}% - 10px)`
+                    ? `calc(${((parseInt(form.frequency) - 1.8) / 10.2) * 100}% - 10px)`
                     : `calc(${(parseInt(form.frequency) / 30) * 100}% - 10px)`
                 }}
               />
