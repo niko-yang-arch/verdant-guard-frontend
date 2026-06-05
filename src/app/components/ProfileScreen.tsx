@@ -1,5 +1,5 @@
 import { motion } from 'motion/react';
-import { User, Bell, Moon, ChevronRight, LogOut, Shield, HelpCircle } from 'lucide-react';
+import { ChevronRight, LogOut, Shield, HelpCircle } from 'lucide-react';
 import { User as UserType } from '../api';
 
 function MenuItem({
@@ -35,11 +35,15 @@ export function ProfileScreen({
   plantCount = 0,
   totalWatered = 0,
   onLogout,
+  onPrivacyPolicy,
+  onHelpFeedback,
 }: {
   user: UserType | null;
   plantCount?: number;
   totalWatered?: number;
   onLogout: () => void;
+  onPrivacyPolicy?: () => void;
+  onHelpFeedback?: () => void;
 }) {
   const joinDays = user?.createdAt
     ? Math.floor((Date.now() - new Date(user.createdAt).getTime()) / 86400000)
@@ -99,14 +103,8 @@ export function ProfileScreen({
         style={{ touchAction: 'pan-y', overscrollBehavior: 'contain' }}
       >
         <div className="bg-card border border-border rounded-2xl overflow-hidden">
-          <MenuItem icon={<User size={16} />} label="编辑个人资料" />
-          <MenuItem icon={<Bell size={16} />} label="浇水提醒通知" value="已开启" />
-          <MenuItem icon={<Moon size={16} />} label="深色模式" value="跟随系统" />
-        </div>
-
-        <div className="bg-card border border-border rounded-2xl overflow-hidden">
-          <MenuItem icon={<Shield size={16} />} label="隐私政策" />
-          <MenuItem icon={<HelpCircle size={16} />} label="帮助与反馈" />
+          <MenuItem icon={<Shield size={16} />} label="隐私政策" onClick={onPrivacyPolicy} />
+          <MenuItem icon={<HelpCircle size={16} />} label="帮助与反馈" onClick={onHelpFeedback} />
         </div>
 
         <div className="bg-card border border-border rounded-2xl overflow-hidden">

@@ -9,6 +9,8 @@ import { AddPlantScreen } from './components/AddPlantScreen';
 import { CalendarScreen } from './components/CalendarScreen';
 import { ProfileScreen } from './components/ProfileScreen';
 import { EditPlantScreen } from './components/EditPlantScreen';
+import { PrivacyPolicyScreen } from './components/PrivacyPolicyScreen';
+import { HelpFeedbackScreen } from './components/HelpFeedbackScreen';
 
 type Tab = 'home' | 'calendar' | 'profile';
 
@@ -26,6 +28,8 @@ export default function App() {
   const [selectedPlant, setSelectedPlant] = useState<Plant | null>(null);
   const [showAdd, setShowAdd] = useState(false);
   const [editingPlant, setEditingPlant] = useState<Plant | null>(null);
+  const [showPrivacy, setShowPrivacy] = useState(false);
+  const [showHelp, setShowHelp] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -191,6 +195,8 @@ export default function App() {
                         plantCount={plants.length}
                         totalWatered={totalWatered}
                         onLogout={handleLogout}
+                        onPrivacyPolicy={() => setShowPrivacy(true)}
+                        onHelpFeedback={() => setShowHelp(true)}
                       />
                     </motion.div>
                   )}
@@ -249,6 +255,18 @@ export default function App() {
                     plant={editingPlant}
                     onBack={() => setEditingPlant(null)}
                     onSave={(data) => handleEditPlant(editingPlant.id, data)}
+                  />
+                )}
+                {showPrivacy && (
+                  <PrivacyPolicyScreen
+                    key="privacy"
+                    onBack={() => setShowPrivacy(false)}
+                  />
+                )}
+                {showHelp && (
+                  <HelpFeedbackScreen
+                    key="help"
+                    onBack={() => setShowHelp(false)}
                   />
                 )}
               </AnimatePresence>
