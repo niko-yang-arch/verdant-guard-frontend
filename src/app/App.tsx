@@ -11,6 +11,7 @@ import { ProfileScreen } from './components/ProfileScreen';
 import { EditPlantScreen } from './components/EditPlantScreen';
 import { PrivacyPolicyScreen } from './components/PrivacyPolicyScreen';
 import { HelpFeedbackScreen } from './components/HelpFeedbackScreen';
+import { AboutScreen } from './components/AboutScreen';
 
 type Tab = 'home' | 'calendar' | 'profile';
 
@@ -30,6 +31,7 @@ export default function App() {
   const [editingPlant, setEditingPlant] = useState<Plant | null>(null);
   const [showPrivacy, setShowPrivacy] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
+  const [showAbout, setShowAbout] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -101,7 +103,10 @@ export default function App() {
 
   const handleAddPlant = async (data: { name: string; species: string; frequency: number; frequencyType: 'DAYS' | 'TIMES_PER_DAY'; image?: string }) => {
     try {
-      const newPlant = await apiAddPlant(data);
+      let newPlant = await apiAddPlant(data);
+      if (newPlant.historyCount === undefined || newPlant.historyCount === null) {
+        newPlant = { ...newPlant, historyCount: 0 };
+      }
       setPlants((ps) => [newPlant, ...ps]);
       setShowAdd(false);
     } catch (e: any) {
@@ -122,7 +127,7 @@ export default function App() {
     }
   };
 
-  const totalWatered = plants.reduce((s, p) => s + p.historyCount, 0);
+  const totalWatered = plants.reduce((s, p) => s + (p.historyCount || 0), 0);
 
   return (
     <div
@@ -197,6 +202,7 @@ export default function App() {
                         onLogout={handleLogout}
                         onPrivacyPolicy={() => setShowPrivacy(true)}
                         onHelpFeedback={() => setShowHelp(true)}
+                        onAbout={() => setShowAbout(true)}
                       />
                     </motion.div>
                   )}
@@ -267,6 +273,12 @@ export default function App() {
                   <HelpFeedbackScreen
                     key="help"
                     onBack={() => setShowHelp(false)}
+                  />
+                )}
+                {showAbout && (
+                  <AboutScreen
+                    key="about"
+                    onBack={() => setShowAbout(false)}
                   />
                 )}
               </AnimatePresence>

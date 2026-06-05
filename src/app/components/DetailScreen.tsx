@@ -30,10 +30,11 @@ export function DetailScreen({
   plant: Plant;
   onBack: () => void;
   onDelete: (id: number) => void;
-  onWater: (plantId: number) => void;
+  onWater: (plantId: number) => Promise<void> | void;
   onEdit: (plant: Plant) => void;
 }) {
   const [watered, setWatered] = useState(false);
+  const [watering, setWatering] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [history, setHistory] = useState<WaterLog[]>([]);
   const [loadingHistory, setLoadingHistory] = useState(false);
@@ -47,18 +48,33 @@ export function DetailScreen({
       .finally(() => setLoadingHistory(false));
   }, [plant.id]);
 
-  const handleWater = () => {
-    setWatered(true);
-    onWater(plant.id);
+  const handleWater = async () => {
+    if (watering) return;
     
-    const newLog: WaterLog = {
-      id: Date.now(),
-      plantId: plant.id,
-      date: new Date().toISOString(),
-    };
-    setHistory((prev) => [newLog, ...prev]);
-    
-    setTimeout(() => setWatered(false), 2500);
+    try {
+      setWatering(true);
+      setWatered(true);
+      
+      // 先更新本地状态（乐观更新）
+      const newLog: WaterLog = {
+        id: Date.now(),
+        plantId: plant.id,
+        date: new Date().toISOString(),
+      };
+      setHistory((prev) => [newLog, ...prev]);
+      
+      // 等待后端响应
+      await onWater(plant.id);
+      
+      setTimeout(() => setWatered(false), 2500);
+    } catch (e: any) {
+      // 失败时回滚本地状态
+      setHistory((prev) => prev.filter((h) => h.id !== Date.now()));
+      setWatered(false);
+      // 这里的错误处理在App.tsx中已经有alert了
+    } finally {
+      setWatering(false);
+    }
   };
 
   const freqLabel =
@@ -187,11 +203,23 @@ export function DetailScreen({
 
           <motion.button
             onClick={handleWater}
-            whileTap={{ scale: 0.96 }}
-            className="flex-1 py-3 rounded-2xl bg-primary text-primary-foreground text-sm flex items-center justify-center gap-2"
+            disabled={watering}
+            whileTap={watering ? {} : { scale: 0.96 }}
+            className="flex-1 py-3 rounded-2xl bg-primary text-primary-foreground text-sm flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <AnimatePresence mode="wait">
-              {watered ? (
+              {watering ? (
+                <motion.span
+                  key="loading"
+                  initial={{ opacity: 0, y: 6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -6 }}
+                  className="flex items-center gap-2"
+                >
+                  <div className="w-4 h-4 border-2 border-primary-foreground border-t-transparent rounded-full animate-spin" />
+                  记录中...
+                </motion.span>
+              ) : watered ? (
                 <motion.span
                   key="done"
                   initial={{ opacity: 0, y: 6 }}
@@ -224,18 +252,17 @@ export function DetailScreen({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="absolute inset-0 bg-black/50 flex items-end z-30"
+            className="fixed inset-0 bg-black/50 flex items-center justify-center z-[100]"
             onClick={() => setShowDeleteConfirm(false)}
           >
             <motion.div
-              initial={{ y: '100%' }}
-              animate={{ y: 0 }}
-              exit={{ y: '100%' }}
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
               transition={{ type: 'spring', damping: 28, stiffness: 280 }}
               onClick={(e) => e.stopPropagation()}
-              className="w-full bg-card rounded-t-3xl px-5 pt-5 pb-10"
+              className="w-[90%] max-w-sm bg-card rounded-2xl px-5 py-5"
             >
-              <div className="w-10 h-1 bg-muted rounded-full mx-auto mb-5" />
               <h3
                 className="text-card-foreground mb-1"
                 style={{ fontFamily: "'DM Serif Display', serif", fontSize: '1.15rem' }}

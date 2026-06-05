@@ -1,5 +1,5 @@
 import { motion } from 'motion/react';
-import { ChevronRight, LogOut, Shield, HelpCircle } from 'lucide-react';
+import { ChevronRight, LogOut, Shield, HelpCircle, Info } from 'lucide-react';
 import { User as UserType } from '../api';
 
 function MenuItem({
@@ -37,6 +37,7 @@ export function ProfileScreen({
   onLogout,
   onPrivacyPolicy,
   onHelpFeedback,
+  onAbout,
 }: {
   user: UserType | null;
   plantCount?: number;
@@ -44,6 +45,7 @@ export function ProfileScreen({
   onLogout: () => void;
   onPrivacyPolicy?: () => void;
   onHelpFeedback?: () => void;
+  onAbout?: () => void;
 }) {
   const joinDays = user?.createdAt
     ? Math.floor((Date.now() - new Date(user.createdAt).getTime()) / 86400000)
@@ -105,6 +107,7 @@ export function ProfileScreen({
         <div className="bg-card border border-border rounded-2xl overflow-hidden">
           <MenuItem icon={<Shield size={16} />} label="隐私政策" onClick={onPrivacyPolicy} />
           <MenuItem icon={<HelpCircle size={16} />} label="帮助与反馈" onClick={onHelpFeedback} />
+          <MenuItem icon={<Info size={16} />} label="开发者信息" onClick={onAbout} />
         </div>
 
         <div className="bg-card border border-border rounded-2xl overflow-hidden">
