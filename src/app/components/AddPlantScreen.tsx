@@ -203,15 +203,15 @@ export function AddPlantScreen({
               const x = Math.max(0, Math.min(e.clientX - rect.left, rect.width));
               const percent = x / rect.width;
               const maxVal = form.frequencyType === "TIMES_PER_DAY" ? 12 : 30;
-              const minVal = form.frequencyType === "TIMES_PER_DAY" ? 1 : 1;
+              const minVal = form.frequencyType === "TIMES_PER_DAY" ? 2 : 1;
               const newValue = Math.round(minVal + percent * (maxVal - minVal));
-              set("frequency", String(newValue));
+              set("frequency", String(Math.max(minVal, newValue)));
 
               const onMove = (e: MouseEvent) => {
                 const x = Math.max(0, Math.min(e.clientX - rect.left, rect.width));
                 const percent = x / rect.width;
                 const newValue = Math.round(minVal + percent * (maxVal - minVal));
-                set("frequency", String(newValue));
+                set("frequency", String(Math.max(minVal, newValue)));
               };
               const onUp = () => {
                 document.removeEventListener('mousemove', onMove);
@@ -227,16 +227,16 @@ export function AddPlantScreen({
               const x = Math.max(0, Math.min(e.touches[0].clientX - rect.left, rect.width));
               const percent = x / rect.width;
               const maxVal = form.frequencyType === "TIMES_PER_DAY" ? 12 : 30;
-              const minVal = form.frequencyType === "TIMES_PER_DAY" ? 1 : 1;
+              const minVal = form.frequencyType === "TIMES_PER_DAY" ? 2 : 1;
               const newValue = Math.round(minVal + percent * (maxVal - minVal));
-              set("frequency", String(newValue));
+              set("frequency", String(Math.max(minVal, newValue)));
 
               const onMove = (e: TouchEvent) => {
                 e.preventDefault();
                 const x = Math.max(0, Math.min(e.touches[0].clientX - rect.left, rect.width));
                 const percent = x / rect.width;
                 const newValue = Math.round(minVal + percent * (maxVal - minVal));
-                set("frequency", String(newValue));
+                set("frequency", String(Math.max(minVal, newValue)));
               };
               const onEnd = () => {
                 document.removeEventListener('touchmove', onMove);
@@ -251,7 +251,7 @@ export function AddPlantScreen({
                 className="absolute h-full bg-primary rounded-full"
                 style={{
                   width: form.frequencyType === "TIMES_PER_DAY"
-                    ? `${((parseInt(form.frequency) - 1) / 11) * 100}%`
+                    ? `${((parseInt(form.frequency) - 2) / 10) * 100}%`
                     : `${(parseInt(form.frequency) / 30) * 100}%`
                 }}
               />
@@ -259,14 +259,14 @@ export function AddPlantScreen({
                 className="absolute w-5 h-5 bg-white border-2 border-primary rounded-full shadow-md -top-1.5 transition-transform active:scale-110"
                 style={{
                   left: form.frequencyType === "TIMES_PER_DAY"
-                    ? `calc(${((parseInt(form.frequency) - 1) / 11) * 100}% - 10px)`
+                    ? `calc(${((parseInt(form.frequency) - 2) / 10) * 100}% - 10px)`
                     : `calc(${(parseInt(form.frequency) / 30) * 100}% - 10px)`
                 }}
               />
             </div>
           </div>
           <div className="flex justify-between text-xs text-muted-foreground mt-2">
-            <span>{form.frequencyType === "TIMES_PER_DAY" ? "1次" : "1天"}</span>
+            <span>{form.frequencyType === "TIMES_PER_DAY" ? "2次" : "1天"}</span>
             <span className="text-primary font-medium">
               {form.frequencyType === "TIMES_PER_DAY"
                 ? `每天 ${form.frequency} 次`
