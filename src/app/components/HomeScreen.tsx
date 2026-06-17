@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Search, Droplets, Plus, Clock } from 'lucide-react';
+import { Search, Plus } from 'lucide-react';
 import { Plant, User, daysUntilNextWater, formatLastWatered } from '../api';
 
 function needsWateringToday(plant: Plant): boolean {
@@ -11,28 +11,21 @@ function needsWateringToday(plant: Plant): boolean {
   return daysUntilNextWater(plant) === 0 && todayCount === 0;
 }
 
-function urgencyColor(days: number) {
-  if (days === 0) return '#e85d3a';
-  if (days === 1) return '#f0a050';
-  return '#2d6a2d';
-}
-
 function PlantCard({ plant, onClick }: { plant: Plant; onClick: () => void }) {
-  const days = daysUntilNextWater(plant);
-  const color = urgencyColor(days);
+  const lastWateredLabel = formatLastWatered(plant.lastWatered);
+  const lastWateredColor = plant.lastWatered ? '#2d6a2d' : '#6f756f';
 
   return (
     <motion.button
       whileTap={{ scale: 0.98 }}
       onClick={onClick}
       className="w-full bg-card border border-border rounded-2xl overflow-hidden text-left flex flex-col"
-      style={{ aspectRatio: '3/4' }}
     >
-      {/* Image area - 2/3 of card */}
-      <div className="flex-[2] bg-muted overflow-hidden">
+      {/* Image area */}
+      <div className="h-52 sm:h-60 bg-muted overflow-hidden">
         {plant.image ? (
           <img
-            src={`${plant.image}?w=400&h=400&fit=crop&auto=format`}
+            src={`${plant.image}?w=700&h=420&fit=crop&auto=format`}
             alt={plant.name}
             className="w-full h-full object-cover"
           />
@@ -40,19 +33,19 @@ function PlantCard({ plant, onClick }: { plant: Plant; onClick: () => void }) {
           <div className="w-full h-full flex items-center justify-center text-5xl">🌿</div>
         )}
       </div>
-      {/* Info area - 1/3 of card */}
-      <div className="flex-1 px-3 py-2.5 flex flex-col justify-between">
+      {/* Info area */}
+      <div className="px-4 py-3.5">
         <div>
-          <p className="text-card-foreground text-sm font-medium leading-tight">{plant.name}</p>
-          <p className="text-muted-foreground text-xs italic mt-0.5 leading-tight">{plant.species}</p>
+          <p className="text-card-foreground text-base font-medium leading-tight">{plant.name}</p>
+          <p className="text-muted-foreground text-xs italic mt-1 leading-tight">{plant.species}</p>
         </div>
-        <div className="flex items-center justify-between mt-1">
+        <div className="flex items-center justify-between gap-3 mt-3">
           <span className="text-xs text-muted-foreground">浇水 {plant.historyCount} 次</span>
           <span
-            className="text-xs font-medium px-2 py-0.5 rounded-full"
-            style={{ backgroundColor: `${color}18`, color }}
+            className="text-xs font-medium px-2.5 py-1 rounded-full shrink-0"
+            style={{ backgroundColor: `${lastWateredColor}18`, color: lastWateredColor }}
           >
-            {days === 0 ? '今天' : days === 1 ? '明天' : `${days}天`}
+            上次 {lastWateredLabel}
           </span>
         </div>
       </div>
@@ -213,7 +206,7 @@ export function HomeScreen({
             </h2>
             <span className="text-muted-foreground text-xs">{filtered.length} 株</span>
           </div>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 gap-3">
             {filtered.map((p, i) => (
               <motion.div
                 key={p.id}
@@ -225,7 +218,7 @@ export function HomeScreen({
               </motion.div>
             ))}
             {filtered.length === 0 && !loading && (
-              <p className="col-span-2 text-center text-muted-foreground text-sm py-10">
+              <p className="text-center text-muted-foreground text-sm py-10">
                 {query ? '未找到相关植物' : '还没有添加植物，快去添加一株吧！'}
               </p>
             )}
