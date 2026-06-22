@@ -1,4 +1,5 @@
-import { useState, useEffect, useCallback } from 'react';
+import { Component, useState, useEffect, useCallback } from 'react';
+import type { ReactNode } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import { Home, CalendarDays, User } from 'lucide-react';
 import { Plant, User as UserType, WaterLog, authLogin, authMe, getPlantList, getPlantInfo, addWaterLog, deletePlant, addPlant as apiAddPlant, updatePlant } from './api';
@@ -20,6 +21,41 @@ const NAV: { id: Tab; icon: typeof Home; label: string }[] = [
   { id: 'calendar', icon: CalendarDays, label: '日历' },
   { id: 'profile', icon: User, label: '我的' },
 ];
+
+class OverlayErrorBoundary extends Component<
+  { children: ReactNode; onBack: () => void },
+  { hasError: boolean }
+> {
+  state = { hasError: false };
+
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+
+  componentDidCatch(error: unknown) {
+    console.error('Overlay render failed', error);
+  }
+
+  render() {
+    if (!this.state.hasError) return this.props.children;
+
+    return (
+      <div
+        className="absolute inset-0 bg-background z-50 flex flex-col items-center justify-center px-6 text-center"
+        style={{ fontFamily: "'DM Sans', sans-serif" }}
+      >
+        <p className="text-foreground text-base font-medium">页面出了点问题</p>
+        <p className="text-muted-foreground text-sm mt-2">请返回后重新打开帮助与反馈。</p>
+        <button
+          onClick={this.props.onBack}
+          className="mt-5 px-5 py-2.5 rounded-xl bg-primary text-primary-foreground text-sm"
+        >
+          返回
+        </button>
+      </div>
+    );
+  }
+}
 
 export default function App() {
   const [loggedIn, setLoggedIn] = useState(() => !!localStorage.getItem('token'));
@@ -293,10 +329,9 @@ export default function App() {
                   />
                 )}
                 {showHelp && (
-                  <HelpFeedbackScreen
-                    key="help"
-                    onBack={() => setShowHelp(false)}
-                  />
+                  <OverlayErrorBoundary key="help" onBack={() => setShowHelp(false)}>
+                    <HelpFeedbackScreen onBack={() => setShowHelp(false)} />
+                  </OverlayErrorBoundary>
                 )}
                 {showAbout && (
                   <AboutScreen

@@ -1,52 +1,90 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { ArrowLeft, HelpCircle, MessageSquare, ChevronDown, Send, Mail, MessageCircle, Bug, Lightbulb } from 'lucide-react';
+import { getHelpFeedbackConfig, submitFeedback } from '../api';
+import type { FeedbackType, HelpFaq } from '../api';
 
-const FAQS = [
+const DEFAULT_FAQS: HelpFaq[] = [
   {
-    q: '如何添加新的植物？',
-    a: '点击首页右下角的"+"按钮，进入添加植物页面。填写植物名称、种类和浇水频率，选择一张图片即可完成添加。',
+    id: 'add-plant',
+    question: '如何添加新的植物？',
+    answer: '点击首页右下角的"+"按钮，进入添加植物页面。填写植物名称、种类和浇水频率，选择一张图片即可完成添加。',
   },
   {
-    q: '浇水提醒是如何工作的？',
-    a: '根据您设置的浇水频率，系统会在应该浇水的前一天发送通知提醒。确保在设置中开启了浇水提醒通知权限。',
+    id: 'watering-reminder',
+    question: '浇水提醒是如何工作的？',
+    answer: '根据您设置的浇水频率，系统会在应该浇水的前一天发送通知提醒。确保在设置中开启了浇水提醒通知权限。',
   },
   {
-    q: '可以同时管理多少棵植物？',
-    a: 'Verdant Guard 对植物数量没有限制，您可以添加任意数量的植物进行管理。',
+    id: 'plant-limit',
+    question: '可以同时管理多少棵植物？',
+    answer: 'Verdant Guard 对植物数量没有限制，您可以添加任意数量的植物进行管理。',
   },
   {
-    q: '如何删除一棵植物？',
-    a: '进入植物详情页，点击右上角的"..."菜单，选择删除选项。删除后该植物的所有浇水记录也会一并清除。',
+    id: 'delete-plant',
+    question: '如何删除一棵植物？',
+    answer: '进入植物详情页，点击右上角的"..."菜单，选择删除选项。删除后该植物的所有浇水记录也会一并清除。',
   },
   {
-    q: '数据会自动同步吗？',
-    a: '是的，所有数据都会自动云端同步。换设备登录同一账号后，您的植物和浇水记录都会保留。',
+    id: 'cloud-sync',
+    question: '数据会自动同步吗？',
+    answer: '是的，所有数据都会自动云端同步。换设备登录同一账号后，您的植物和浇水记录都会保留。',
   },
 ];
 
-const FEEDBACK_TYPES = [
+const FEEDBACK_TYPES: { icon: React.ReactNode; label: string; value: FeedbackType; color: string }[] = [
   { icon: <Bug size={20} />, label: '报告问题', value: 'bug', color: '#ef4444' },
   { icon: <Lightbulb size={20} />, label: '功能建议', value: 'suggestion', color: '#f59e0b' },
   { icon: <MessageCircle size={20} />, label: '其他反馈', value: 'other', color: '#22c55e' },
 ];
 
 export function HelpFeedbackScreen({ onBack }: { onBack: () => void }) {
+  const [faqs, setFaqs] = useState<HelpFaq[]>(DEFAULT_FAQS);
+  const [supportEmail, setSupportEmail] = useState('support@verdantguard.com');
   const [expandedFaq, setExpandedFaq] = useState<number | null>(null);
-  const [selectedType, setSelectedType] = useState<string>('suggestion');
+  const [selectedType, setSelectedType] = useState<FeedbackType>('suggestion');
   const [feedback, setFeedback] = useState('');
   const [contact, setContact] = useState('');
-  const [submitted, setSubmitted] = useState(false);
+  const [showSuccessDialog, setShowSuccessDialog] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
-  const handleSubmit = () => {
-    if (feedback.trim()) {
-      setSubmitted(true);
-      setTimeout(() => {
-        setSubmitted(false);
-        setFeedback('');
-        setContact('');
-      }, 3000);
+  useEffect(() => {
+    getHelpFeedbackConfig()
+      .then((config) => {
+        setFaqs(Array.isArray(config?.faqs) && config.faqs.length > 0 ? config.faqs : DEFAULT_FAQS);
+        setSupportEmail(config.supportEmail || 'support@verdantguard.com');
+      })
+      .catch(() => {
+        setFaqs(DEFAULT_FAQS);
+      });
+  }, []);
+
+  const handleSubmit = async () => {
+    const content = feedback.trim();
+    if (!content || submitting) return;
+
+    try {
+      setSubmitting(true);
+      setSubmitError(null);
+      await submitFeedback({
+        type: selectedType,
+        content,
+        contact: contact.trim() || undefined,
+      });
+      setShowSuccessDialog(true);
+    } catch (e: any) {
+      setSubmitError(e.message || '提交失败，请稍后重试');
+    } finally {
+      setSubmitting(false);
     }
+  };
+
+  const handleSuccessConfirm = () => {
+    setFeedback('');
+    setContact('');
+    setShowSuccessDialog(false);
+    onBack();
   };
 
   return (
@@ -99,9 +137,9 @@ export function HelpFeedbackScreen({ onBack }: { onBack: () => void }) {
           常见问题
         </h2>
         <div className="space-y-2">
-          {FAQS.map((faq, index) => (
+          {faqs.map((faq, index) => (
             <motion.div
-              key={index}
+              key={faq.id}
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.05 }}
@@ -111,7 +149,7 @@ export function HelpFeedbackScreen({ onBack }: { onBack: () => void }) {
                 onClick={() => setExpandedFaq(expandedFaq === index ? null : index)}
                 className="w-full flex items-center justify-between p-4 text-left"
               >
-                <span className="text-foreground text-sm flex-1 pr-2">{faq.q}</span>
+                <span className="text-foreground text-sm flex-1 pr-2">{faq.question}</span>
                 <motion.div
                   animate={{ rotate: expandedFaq === index ? 180 : 0 }}
                   transition={{ duration: 0.2 }}
@@ -130,7 +168,7 @@ export function HelpFeedbackScreen({ onBack }: { onBack: () => void }) {
                   >
                     <div className="px-4 pb-4 pt-0">
                       <p className="text-muted-foreground text-sm leading-relaxed border-t border-border pt-3">
-                        {faq.a}
+                        {faq.answer}
                       </p>
                     </div>
                   </motion.div>
@@ -156,6 +194,7 @@ export function HelpFeedbackScreen({ onBack }: { onBack: () => void }) {
             <div className="grid grid-cols-3 gap-2">
               {FEEDBACK_TYPES.map((type) => (
                 <button
+                  type="button"
                   key={type.value}
                   onClick={() => setSelectedType(type.value)}
                   className="flex flex-col items-center gap-1.5 p-3 rounded-xl border-2 transition-all"
@@ -201,37 +240,68 @@ export function HelpFeedbackScreen({ onBack }: { onBack: () => void }) {
           </div>
 
           {/* Submit Button */}
-          <motion.button
+          <button
+            type="button"
             onClick={handleSubmit}
-            disabled={!feedback.trim() || submitted}
-            whileTap={{ scale: 0.98 }}
-            className="w-full py-3.5 rounded-xl text-sm font-medium flex items-center justify-center gap-2 transition-all"
+            disabled={!feedback.trim() || showSuccessDialog || submitting}
+            className="w-full py-3.5 rounded-xl text-sm font-medium flex items-center justify-center gap-2 transition-all active:scale-[0.98] disabled:active:scale-100"
             style={{
-              background: submitted ? '#22c55e' : feedback.trim() ? 'linear-gradient(135deg, #2d6a2d 0%, #4a9a4a 100%)' : 'var(--muted)',
+              background: feedback.trim() && !submitting && !showSuccessDialog ? 'linear-gradient(135deg, #2d6a2d 0%, #4a9a4a 100%)' : 'var(--muted)',
               color: 'white',
             }}
           >
-            {submitted ? (
-              <>
-                <Send size={16} />
-                感谢您的反馈！
-              </>
-            ) : (
-              <>
+            <span className="w-4 h-4 flex items-center justify-center shrink-0">
+              {submitting ? (
+                <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              ) : (
                 <MessageSquare size={16} />
-                提交反馈
-              </>
-            )}
-          </motion.button>
+              )}
+            </span>
+            <span>{submitting ? '提交中...' : '提交反馈'}</span>
+          </button>
+          {submitError && (
+            <p className="text-destructive text-xs text-center">{submitError}</p>
+          )}
         </div>
 
         {/* Contact Info */}
         <div className="mt-6 p-4 rounded-xl text-center" style={{ background: 'var(--secondary)' }}>
           <p className="text-muted-foreground text-xs">
-            发送邮件至 <span className="text-primary">support@verdantguard.com</span>
+            发送邮件至 <span className="text-primary">{supportEmail}</span>
           </p>
         </div>
       </div>
+
+      {showSuccessDialog && (
+        <div
+          className="fixed inset-0 z-[120] bg-black/50 flex items-center justify-center px-6"
+          role="presentation"
+        >
+          <div
+            className="w-full max-w-sm bg-card border border-border rounded-2xl px-5 py-5 text-center shadow-xl"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="feedback-success-title"
+          >
+            <div className="mx-auto w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-3">
+              <Send size={22} className="text-primary" />
+            </div>
+            <h2 id="feedback-success-title" className="text-card-foreground text-base font-medium">
+              感谢反馈！
+            </h2>
+            <p className="text-muted-foreground text-sm leading-relaxed mt-2">
+              您的反馈我们已经收到，会认真查看并持续优化 Verdant Guard。
+            </p>
+            <button
+              type="button"
+              onClick={handleSuccessConfirm}
+              className="w-full mt-5 py-3 rounded-xl bg-primary text-primary-foreground text-sm font-medium active:scale-[0.98] transition-transform"
+            >
+              确认
+            </button>
+          </div>
+        </div>
+      )}
     </motion.div>
   );
 }

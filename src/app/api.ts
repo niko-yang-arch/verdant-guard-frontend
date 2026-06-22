@@ -88,6 +88,35 @@ export interface AddPlantPayload {
   image?: string;
 }
 
+export type FeedbackType = 'bug' | 'suggestion' | 'other';
+
+export interface HelpFaq {
+  id: string;
+  question: string;
+  answer: string;
+}
+
+export interface HelpFeedbackConfig {
+  faqs: HelpFaq[];
+  feedbackTypes: {
+    label: string;
+    value: FeedbackType;
+  }[];
+  supportEmail: string;
+}
+
+export interface SubmitFeedbackPayload {
+  type: FeedbackType;
+  content: string;
+  contact?: string;
+}
+
+export interface SubmitFeedbackResponse {
+  id: string;
+  status: 'submitted';
+  submittedAt: string;
+}
+
 // ── Auth ─────────────────────────────────────────────────────────────────────
 
 export interface LoginResponse {
@@ -140,6 +169,16 @@ export const getCalendar = (year: number, month: number) =>
 /** 获取植物浇水历史 */
 export const getPlantWaterLogs = (plantId: number) =>
   api.get<WaterLog[]>(`/api/water-logs/plant/${plantId}`).then((r) => r.data);
+
+// ── Help & Feedback ─────────────────────────────────────────────────────────
+
+/** 获取帮助与反馈页面配置 */
+export const getHelpFeedbackConfig = () =>
+  api.get<HelpFeedbackConfig>('/api/help-feedback/config').then((r) => r.data);
+
+/** 提交用户反馈 */
+export const submitFeedback = (payload: SubmitFeedbackPayload) =>
+  api.post<SubmitFeedbackResponse>('/api/help-feedback/submit', payload).then((r) => r.data);
 
 
 
