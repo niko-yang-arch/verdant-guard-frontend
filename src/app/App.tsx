@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import { Home, CalendarDays, User } from 'lucide-react';
-import { Plant, User as UserType, daysUntilNextWater, authLogin, authMe, getPlantList, addWaterLog, deletePlant, addPlant as apiAddPlant, updatePlant } from './api';
+import { Plant, User as UserType, WaterLog, authLogin, authMe, getPlantList, getPlantInfo, addWaterLog, deletePlant, addPlant as apiAddPlant, updatePlant } from './api';
 import { LoginScreen } from './components/LoginScreen';
 import { HomeScreen } from './components/HomeScreen';
 import { DetailScreen } from './components/DetailScreen';
@@ -73,18 +73,41 @@ export default function App() {
     setLoggedIn(false);
   };
 
-  const handleWater = async (plantId: number) => {
-    await addWaterLog(plantId);
+  const handleWater = async (plantId: number): Promise<WaterLog> => {
+    const waterLog = await addWaterLog(plantId);
+    const wateredAt = waterLog.date || new Date().toISOString();
+
     setPlants((ps) =>
       ps.map((p) =>
         p.id === plantId
-          ? { ...p, lastWatered: new Date().toISOString(), historyCount: p.historyCount + 1, todayCount: (p.todayCount ?? 0) + 1 }
+          ? { ...p, lastWatered: wateredAt, historyCount: p.historyCount + 1, todayCount: (p.todayCount ?? 0) + 1 }
           : p
       )
     );
+
     if (selectedPlant?.id === plantId) {
-      setSelectedPlant((p) => p ? { ...p, lastWatered: new Date().toISOString(), historyCount: p.historyCount + 1, todayCount: (p.todayCount ?? 0) + 1 } : null);
+      setSelectedPlant((p) => p ? { ...p, lastWatered: wateredAt, historyCount: p.historyCount + 1, todayCount: (p.todayCount ?? 0) + 1 } : null);
     }
+
+    try {
+      const [latestPlants, latestPlant] = await Promise.all([
+        getPlantList(),
+        getPlantInfo(plantId).catch(() => null),
+      ]);
+      setPlants(latestPlants);
+      if (latestPlant) {
+        setSelectedPlant((p) => (p?.id === plantId ? latestPlant : p));
+      }
+    } catch {
+      // The local state has already been updated; keep the UI responsive if a refresh fails.
+    }
+
+    return waterLog;
+  };
+
+  const handleDetailBack = () => {
+    setSelectedPlant(null);
+    loadPlants();
   };
 
   const handleDelete = async (id: number) => {
@@ -242,7 +265,7 @@ export default function App() {
                   <DetailScreen
                     key="detail"
                     plant={selectedPlant}
-                    onBack={() => setSelectedPlant(null)}
+                    onBack={handleDetailBack}
                     onDelete={handleDelete}
                     onWater={handleWater}
                     onEdit={setEditingPlant}

@@ -30,7 +30,7 @@ export function DetailScreen({
   plant: Plant;
   onBack: () => void;
   onDelete: (id: number) => void;
-  onWater: (plantId: number) => Promise<void> | void;
+  onWater: (plantId: number) => Promise<WaterLog> | WaterLog;
   onEdit: (plant: Plant) => void;
 }) {
   const [watered, setWatered] = useState(false);
@@ -41,7 +41,7 @@ export function DetailScreen({
   const days = daysUntilNextWater(plant);
 
   // 计算今天已浇水的次数（用于 TIMES_PER_DAY 类型）
-  const todayCount = (() => {
+  const historyTodayCount = (() => {
     const now = new Date();
     const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0);
     const todayEnd = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59);
@@ -50,6 +50,7 @@ export function DetailScreen({
       return logDate >= todayStart && logDate <= todayEnd;
     }).length;
   })();
+  const todayCount = Math.max(historyTodayCount, plant.todayCount ?? 0);
 
   // 浇水状态文案
   const waterStatusText = (() => {
@@ -67,12 +68,17 @@ export function DetailScreen({
   const isNeedWater = plant.frequencyType === 'TIMES_PER_DAY' ? todayCount < plant.frequency : days === 0;
 
   useEffect(() => {
+    const plantWithHistory = plant as Plant & { history?: WaterLog[] };
+    if (Array.isArray(plantWithHistory.history)) {
+      setHistory(plantWithHistory.history);
+    }
+
     setLoadingHistory(true);
     getPlantInfo(plant.id)
       .then((data) => setHistory(data.history))
       .catch(() => setHistory([]))
       .finally(() => setLoadingHistory(false));
-  }, [plant.id]);
+  }, [plant.id, plant.lastWatered, plant.historyCount, plant.todayCount]);
 
   const handleWater = async () => {
     if (watering) return;
@@ -119,16 +125,11 @@ export function DetailScreen({
       setWatering(true);
 
       // 先调用后端接口，二次校验
-      await onWater(plant.id);
+      const waterLog = await onWater(plant.id);
 
       // 后端成功后再更新本地状态
       setWatered(true);
-      const newLog: WaterLog = {
-        id: Date.now(),
-        plantId: plant.id,
-        date: new Date().toISOString(),
-      };
-      setHistory((prev) => [newLog, ...prev]);
+      setHistory((prev) => [waterLog, ...prev.filter((log) => log.id !== waterLog.id)]);
 
       setTimeout(() => setWatered(false), 2500);
     } catch (e: any) {
@@ -218,9 +219,17 @@ export function DetailScreen({
         <div className="grid grid-cols-2 gap-3">
           {[
             { label: '上次浇水', value: formatLastWatered(plant.lastWatered) },
-            { label: '浇水次数', value: `${plant.historyCount} 次` },
+            {
+              label: '今日浇水',
+              value:
+                plant.frequencyType === 'TIMES_PER_DAY'
+                  ? `${todayCount}/${plant.frequency} 次`
+                  : todayCount > 0
+                    ? '已浇水'
+                    : '未浇水',
+            },
+            { label: '累计浇水', value: `${plant.historyCount} 次` },
             { label: '浇水频率', value: freqLabel },
-            { label: '添加时间', value: new Date(plant.createdAt).toLocaleDateString('zh-CN') },
           ].map((item, i) => (
             <div key={i} className="bg-card border border-border rounded-xl px-3 py-3">
               <p className="text-muted-foreground text-xs">{item.label}</p>

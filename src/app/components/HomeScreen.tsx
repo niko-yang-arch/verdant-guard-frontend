@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Search, Plus } from 'lucide-react';
-import { Plant, User, daysUntilNextWater, formatLastWatered } from '../api';
+import { Plant, User, daysUntilNextWater, formatNextWatering } from '../api';
 
 function needsWateringToday(plant: Plant): boolean {
   const todayCount = plant.todayCount ?? 0;
@@ -12,8 +12,15 @@ function needsWateringToday(plant: Plant): boolean {
 }
 
 function PlantCard({ plant, onClick }: { plant: Plant; onClick: () => void }) {
-  const lastWateredLabel = formatLastWatered(plant.lastWatered);
-  const lastWateredColor = plant.lastWatered ? '#2d6a2d' : '#6f756f';
+  const nextWateringLabel = formatNextWatering(plant);
+  const nextWateringColor = needsWateringToday(plant) ? '#c0392b' : '#2d6a2d';
+  const todayCount = plant.todayCount ?? 0;
+  const wateringProgress =
+    plant.frequencyType === 'TIMES_PER_DAY'
+      ? `今日 ${todayCount}/${plant.frequency} 次`
+      : todayCount > 0
+        ? '今日已浇水'
+        : `累计 ${plant.historyCount} 次`;
 
   return (
     <motion.button
@@ -40,12 +47,12 @@ function PlantCard({ plant, onClick }: { plant: Plant; onClick: () => void }) {
           <p className="text-muted-foreground text-xs italic mt-1 leading-tight">{plant.species}</p>
         </div>
         <div className="flex items-center justify-between gap-3 mt-3">
-          <span className="text-xs text-muted-foreground">浇水 {plant.historyCount} 次</span>
+          <span className="text-xs text-muted-foreground">{wateringProgress}</span>
           <span
             className="text-xs font-medium px-2.5 py-1 rounded-full shrink-0"
-            style={{ backgroundColor: `${lastWateredColor}18`, color: lastWateredColor }}
+            style={{ backgroundColor: `${nextWateringColor}18`, color: nextWateringColor }}
           >
-            上次 {lastWateredLabel}
+            {nextWateringLabel}
           </span>
         </div>
       </div>

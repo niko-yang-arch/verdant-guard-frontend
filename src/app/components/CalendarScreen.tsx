@@ -5,6 +5,12 @@ import { getCalendar, CalendarDay } from '../api';
 
 const WEEKDAYS = ['日', '一', '二', '三', '四', '五', '六'];
 
+type CalendarSummary = {
+  totalWaterings: number;
+  totalPlants: number;
+  activeDays: number;
+};
+
 function getDaysInMonth(year: number, month: number) {
   return new Date(year, month, 0).getDate();
 }
@@ -13,12 +19,29 @@ function getFirstWeekday(year: number, month: number) {
   return new Date(year, month - 1, 1).getDay();
 }
 
+function buildSummary(data: Record<string, CalendarDay[]>): CalendarSummary {
+  const days = Object.values(data);
+  return {
+    totalWaterings: days.reduce(
+      (sum, plants) => sum + plants.reduce((plantSum, plant) => plantSum + plant.count, 0),
+      0
+    ),
+    totalPlants: new Set(days.flatMap((plants) => plants.map((plant) => plant.id))).size,
+    activeDays: days.length,
+  };
+}
+
 export function CalendarScreen() {
   const today = new Date();
   const [year, setYear] = useState(today.getFullYear());
   const [month, setMonth] = useState(today.getMonth() + 1);
   const [selected, setSelected] = useState<number | null>(today.getDate());
   const [calData, setCalData] = useState<Record<string, CalendarDay[]>>({});
+  const [summary, setSummary] = useState<CalendarSummary>({
+    totalWaterings: 0,
+    totalPlants: 0,
+    activeDays: 0,
+  });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -29,8 +52,16 @@ export function CalendarScreen() {
     setLoading(true);
     setError(null);
     getCalendar(year, month)
-      .then((data) => setCalData(data.data))
-      .catch((e) => setError(e.message))
+      .then((data) => {
+        const nextData = data.data ?? {};
+        setCalData(nextData);
+        setSummary(data.summary ?? buildSummary(nextData));
+      })
+      .catch((e) => {
+        setCalData({});
+        setSummary({ totalWaterings: 0, totalPlants: 0, activeDays: 0 });
+        setError(e.message);
+      })
       .finally(() => setLoading(false));
   }, [year, month]);
 
@@ -47,12 +78,6 @@ export function CalendarScreen() {
   };
 
   const selectedPlants = selected ? (calData[String(selected)] ?? []) : [];
-
-  const totalWaterings = Object.values(calData).reduce(
-    (s, plants) => s + plants.reduce((ss, p) => ss + p.count, 0),
-    0
-  );
-  const totalPlants = new Set(Object.values(calData).flatMap((ps) => ps.map((p) => p.id))).size;
 
   return (
     <div className="h-full flex flex-col overflow-hidden" style={{ fontFamily: "'DM Sans', sans-serif" }}>
@@ -229,8 +254,8 @@ export function CalendarScreen() {
             style={{ fontFamily: "'DM Serif Display', serif", fontSize: '1.05rem' }}
           >
             已浇水{' '}
-            <span className="text-primary">{totalWaterings}</span> 次，涉及{' '}
-            <span className="text-primary">{totalPlants}</span> 株植物
+            <span className="text-primary">{summary.totalWaterings}</span> 次，涉及{' '}
+            <span className="text-primary">{summary.totalPlants}</span> 株植物
           </p>
         </div>
       </div>
