@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Search, Plus } from 'lucide-react';
+import { Search, Plus, X } from 'lucide-react';
 import { Plant, User, daysUntilNextWater, formatNextWatering } from '../api';
 
 function needsWateringToday(plant: Plant): boolean {
@@ -77,6 +77,7 @@ export function HomeScreen({
   onAddClick: () => void;
   onRefresh: () => void;
 }) {
+  const searchInputRef = useRef<HTMLInputElement>(null);
   const [query, setQuery] = useState('');
   const [searching, setSearching] = useState(false);
   const [composing, setComposing] = useState(false);
@@ -102,6 +103,12 @@ export function HomeScreen({
   const greetHour = new Date().getHours();
   const greet = greetHour < 12 ? '早安' : greetHour < 18 ? '下午好' : '晚上好';
   const showSearching = searching || (composing && Boolean(normalizedQuery));
+  const clearSearch = () => {
+    setQuery('');
+    setSearching(false);
+    setComposing(false);
+    searchInputRef.current?.focus();
+  };
 
   return (
     <div className="h-full flex flex-col overflow-hidden" style={{ fontFamily: "'DM Sans', sans-serif" }}>
@@ -133,6 +140,7 @@ export function HomeScreen({
         <div className="flex items-center gap-2 bg-card border border-border rounded-xl px-3 py-2 mt-3">
           <Search size={14} className="text-muted-foreground" />
           <input
+            ref={searchInputRef}
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             onCompositionStart={() => setComposing(true)}
@@ -143,6 +151,16 @@ export function HomeScreen({
             placeholder="搜索植物名称或种类…"
             className="flex-1 bg-transparent text-sm text-foreground placeholder:text-muted-foreground outline-none"
           />
+          {query && (
+            <button
+              type="button"
+              onClick={clearSearch}
+              className="w-5 h-5 rounded-full bg-secondary text-muted-foreground flex items-center justify-center shrink-0"
+              aria-label="清空搜索"
+            >
+              <X size={12} />
+            </button>
+          )}
         </div>
       </div>
 
@@ -245,7 +263,7 @@ export function HomeScreen({
               </motion.div>
             ))}
             {showSearching && normalizedQuery && (
-              <p className="text-center text-muted-foreground text-sm py-10">正在搜索</p>
+              <p className="text-center text-muted-foreground text-sm py-10">正在搜索...</p>
             )}
             {!showSearching && filtered.length === 0 && !loading && (
               <p className="text-center text-muted-foreground text-sm py-10">

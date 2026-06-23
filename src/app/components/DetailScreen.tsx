@@ -20,6 +20,17 @@ function HistoryItem({ log }: { log: WaterLog }) {
   );
 }
 
+function isToday(value: string | null) {
+  if (!value) return false;
+  const date = new Date(value);
+  const now = new Date();
+  return (
+    date.getFullYear() === now.getFullYear() &&
+    date.getMonth() === now.getMonth() &&
+    date.getDate() === now.getDate()
+  );
+}
+
 export function DetailScreen({
   plant,
   onBack,
@@ -50,7 +61,8 @@ export function DetailScreen({
       return logDate >= todayStart && logDate <= todayEnd;
     }).length;
   })();
-  const todayCount = Math.max(historyTodayCount, plant.todayCount ?? 0);
+  const lastWateredTodayCount = isToday(plant.lastWatered) ? 1 : 0;
+  const todayCount = Math.max(historyTodayCount, plant.todayCount ?? 0, lastWateredTodayCount);
 
   // 浇水状态文案
   const waterStatusText = (() => {

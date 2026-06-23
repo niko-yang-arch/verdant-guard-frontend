@@ -19,6 +19,16 @@ function getFirstWeekday(year: number, month: number) {
   return new Date(year, month - 1, 1).getDay();
 }
 
+function getAdjacentMonth(year: number, month: number, direction: -1 | 1) {
+  if (direction === -1 && month === 1) return { year: year - 1, month: 12 };
+  if (direction === 1 && month === 12) return { year: year + 1, month: 1 };
+  return { year, month: month + direction };
+}
+
+function clampDayToMonth(day: number, year: number, month: number) {
+  return Math.min(day, getDaysInMonth(year, month));
+}
+
 function buildSummary(data: Record<string, CalendarDay[]>): CalendarSummary {
   const days = Object.values(data);
   return {
@@ -80,16 +90,20 @@ export function CalendarScreen() {
     };
   }, [year, month]);
 
+  const moveMonth = (direction: -1 | 1) => {
+    const next = getAdjacentMonth(year, month, direction);
+    const selectedDay = selected ?? today.getDate();
+    setYear(next.year);
+    setMonth(next.month);
+    setSelected(clampDayToMonth(selectedDay, next.year, next.month));
+  };
+
   const prevMonth = () => {
-    if (month === 1) { setYear((y) => y - 1); setMonth(12); }
-    else setMonth((m) => m - 1);
-    setSelected(null);
+    moveMonth(-1);
   };
 
   const nextMonth = () => {
-    if (month === 12) { setYear((y) => y + 1); setMonth(1); }
-    else setMonth((m) => m + 1);
-    setSelected(null);
+    moveMonth(1);
   };
 
   const selectedPlants = selected ? (calData[String(selected)] ?? []) : [];

@@ -200,13 +200,19 @@ export const uploadImage = (file: File) => {
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
+function startOfLocalDay(date: Date): Date {
+  return new Date(date.getFullYear(), date.getMonth(), date.getDate());
+}
+
+function diffInLocalDays(from: Date, to: Date): number {
+  return Math.floor((startOfLocalDay(to).getTime() - startOfLocalDay(from).getTime()) / 86400000);
+}
+
 export function daysUntilNextWater(plant: Plant): number {
   if (!plant.lastWatered) return 0;
   if (plant.frequencyType === 'TIMES_PER_DAY') return 0;
-  const last = new Date(plant.lastWatered).getTime();
-  const next = last + plant.frequency * 86400000;
-  const diff = Math.ceil((next - Date.now()) / 86400000);
-  return Math.max(0, diff);
+  const daysSinceLastWatered = diffInLocalDays(new Date(plant.lastWatered), new Date());
+  return Math.max(0, plant.frequency - daysSinceLastWatered);
 }
 
 export function formatNextWatering(plant: Plant): string {
@@ -224,7 +230,7 @@ export function formatNextWatering(plant: Plant): string {
 
 export function formatLastWatered(iso: string | null): string {
   if (!iso) return '从未';
-  const diff = Math.floor((Date.now() - new Date(iso).getTime()) / 86400000);
+  const diff = diffInLocalDays(new Date(iso), new Date());
   if (diff === 0) return '今天';
   if (diff === 1) return '昨天';
   return `${diff} 天前`;
