@@ -163,7 +163,7 @@ export const addWaterLog = (plantId: number) =>
 /** 获取日历视图 */
 export const getCalendar = (year: number, month: number) =>
   api
-    .get<CalendarResponse>('/api/water-logs/calendar', { params: { year, month } })
+    .get<CalendarResponse>('/api/water-logs/calendar', { params: { year, month, _t: Date.now() } })
     .then((r) => r.data);
 
 /** 获取植物浇水历史 */

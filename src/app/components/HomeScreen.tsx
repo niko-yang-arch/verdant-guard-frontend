@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Search, Plus } from 'lucide-react';
 import { Plant, User, daysUntilNextWater, formatNextWatering } from '../api';
@@ -29,7 +29,7 @@ function PlantCard({ plant, onClick }: { plant: Plant; onClick: () => void }) {
       className="w-full bg-card border border-border rounded-2xl overflow-hidden text-left flex flex-col"
     >
       {/* Image area */}
-      <div className="h-52 sm:h-60 bg-muted overflow-hidden">
+      <div className="h-44 sm:h-52 bg-muted overflow-hidden">
         {plant.image ? (
           <img
             src={`${plant.image}?w=700&h=420&fit=crop&auto=format`}
@@ -41,15 +41,15 @@ function PlantCard({ plant, onClick }: { plant: Plant; onClick: () => void }) {
         )}
       </div>
       {/* Info area */}
-      <div className="px-4 py-3.5">
+      <div className="px-4 py-2.5">
         <div>
           <p className="text-card-foreground text-base font-medium leading-tight">{plant.name}</p>
-          <p className="text-muted-foreground text-xs italic mt-1 leading-tight">{plant.species}</p>
+          <p className="text-muted-foreground text-xs italic mt-0.5 leading-tight">{plant.species}</p>
         </div>
-        <div className="flex items-center justify-between gap-3 mt-3">
+        <div className="flex items-center justify-between gap-3 mt-2">
           <span className="text-xs text-muted-foreground">{wateringProgress}</span>
           <span
-            className="text-xs font-medium px-2.5 py-1 rounded-full shrink-0"
+            className="text-xs font-medium px-2.5 py-0.5 rounded-full shrink-0"
             style={{ backgroundColor: `${nextWateringColor}18`, color: nextWateringColor }}
           >
             {nextWateringLabel}
@@ -78,15 +78,30 @@ export function HomeScreen({
   onRefresh: () => void;
 }) {
   const [query, setQuery] = useState('');
+  const [searching, setSearching] = useState(false);
+  const [composing, setComposing] = useState(false);
+  const normalizedQuery = query.trim();
+
+  useEffect(() => {
+    if (!normalizedQuery || composing) {
+      setSearching(false);
+      return;
+    }
+
+    setSearching(true);
+    const timer = window.setTimeout(() => setSearching(false), 300);
+    return () => window.clearTimeout(timer);
+  }, [normalizedQuery, composing]);
 
   const urgent = plants.filter((p) => needsWateringToday(p));
   const filtered = plants.filter(
     (p) =>
-      p.name.includes(query) || p.species.toLowerCase().includes(query.toLowerCase())
+      p.name.includes(normalizedQuery) || p.species.toLowerCase().includes(normalizedQuery.toLowerCase())
   );
 
   const greetHour = new Date().getHours();
   const greet = greetHour < 12 ? '早安' : greetHour < 18 ? '下午好' : '晚上好';
+  const showSearching = searching || (composing && Boolean(normalizedQuery));
 
   return (
     <div className="h-full flex flex-col overflow-hidden" style={{ fontFamily: "'DM Sans', sans-serif" }}>
@@ -120,6 +135,11 @@ export function HomeScreen({
           <input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
+            onCompositionStart={() => setComposing(true)}
+            onCompositionEnd={(e) => {
+              setComposing(false);
+              setQuery(e.currentTarget.value);
+            }}
             placeholder="搜索植物名称或种类…"
             className="flex-1 bg-transparent text-sm text-foreground placeholder:text-muted-foreground outline-none"
           />
@@ -128,7 +148,7 @@ export function HomeScreen({
 
       {/* Scrollable content */}
       <div 
-        className="flex-1 overflow-y-auto overflow-x-hidden px-5 pb-24 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden space-y-4"
+        className="flex-1 overflow-y-auto overflow-x-hidden px-5 pb-10 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden space-y-4"
         style={{ touchAction: 'pan-y', overscrollBehavior: 'contain' }}
       >
         {/* Error banner */}
@@ -211,10 +231,10 @@ export function HomeScreen({
             >
               所有植物
             </h2>
-            <span className="text-muted-foreground text-xs">{filtered.length} 株</span>
+            <span className="text-muted-foreground text-xs">{showSearching ? '搜索中' : `${filtered.length} 株`}</span>
           </div>
-          <div className="grid grid-cols-1 gap-3">
-            {filtered.map((p, i) => (
+          <div className="grid grid-cols-1 gap-5">
+            {!showSearching && filtered.map((p, i) => (
               <motion.div
                 key={p.id}
                 initial={{ opacity: 0, y: 12 }}
@@ -224,9 +244,12 @@ export function HomeScreen({
                 <PlantCard plant={p} onClick={() => onPlantClick(p)} />
               </motion.div>
             ))}
-            {filtered.length === 0 && !loading && (
+            {showSearching && normalizedQuery && (
+              <p className="text-center text-muted-foreground text-sm py-10">正在搜索</p>
+            )}
+            {!showSearching && filtered.length === 0 && !loading && (
               <p className="text-center text-muted-foreground text-sm py-10">
-                {query ? '未找到相关植物' : '还没有添加植物，快去添加一株吧！'}
+                {normalizedQuery ? '未找到相关植物' : '还没有添加植物，快去添加一株吧！'}
               </p>
             )}
           </div>

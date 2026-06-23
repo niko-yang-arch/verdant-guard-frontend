@@ -31,17 +31,22 @@ function buildSummary(data: Record<string, CalendarDay[]>): CalendarSummary {
   };
 }
 
+function mergeSummary(apiSummary: CalendarSummary | undefined, data: Record<string, CalendarDay[]>): CalendarSummary {
+  const dataSummary = buildSummary(data);
+  return {
+    totalWaterings: Math.max(apiSummary?.totalWaterings ?? 0, dataSummary.totalWaterings),
+    totalPlants: Math.max(apiSummary?.totalPlants ?? 0, dataSummary.totalPlants),
+    activeDays: Math.max(apiSummary?.activeDays ?? 0, dataSummary.activeDays),
+  };
+}
+
 export function CalendarScreen() {
   const today = new Date();
   const [year, setYear] = useState(today.getFullYear());
   const [month, setMonth] = useState(today.getMonth() + 1);
   const [selected, setSelected] = useState<number | null>(today.getDate());
   const [calData, setCalData] = useState<Record<string, CalendarDay[]>>({});
-  const [summary, setSummary] = useState<CalendarSummary>({
-    totalWaterings: 0,
-    totalPlants: 0,
-    activeDays: 0,
-  });
+  const [summary, setSummary] = useState<CalendarSummary | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -49,20 +54,30 @@ export function CalendarScreen() {
   const firstDay = getFirstWeekday(year, month);
 
   useEffect(() => {
+    let ignore = false;
+
     setLoading(true);
     setError(null);
     getCalendar(year, month)
       .then((data) => {
+        if (ignore) return;
+
         const nextData = data.data ?? {};
         setCalData(nextData);
-        setSummary(data.summary ?? buildSummary(nextData));
+        setSummary(mergeSummary(data.summary, nextData));
       })
       .catch((e) => {
-        setCalData({});
-        setSummary({ totalWaterings: 0, totalPlants: 0, activeDays: 0 });
+        if (ignore) return;
+
         setError(e.message);
       })
-      .finally(() => setLoading(false));
+      .finally(() => {
+        if (!ignore) setLoading(false);
+      });
+
+    return () => {
+      ignore = true;
+    };
   }, [year, month]);
 
   const prevMonth = () => {
@@ -78,6 +93,8 @@ export function CalendarScreen() {
   };
 
   const selectedPlants = selected ? (calData[String(selected)] ?? []) : [];
+  const displayedSummary = mergeSummary(summary ?? undefined, calData);
+  const summaryLoading = loading && summary === null && Object.keys(calData).length === 0;
 
   return (
     <div className="h-full flex flex-col overflow-hidden" style={{ fontFamily: "'DM Sans', sans-serif" }}>
@@ -94,7 +111,7 @@ export function CalendarScreen() {
 
       {/* Scrollable content */}
       <div 
-        className="flex-1 overflow-y-auto overflow-x-hidden px-5 pb-24 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden space-y-4"
+        className="flex-1 overflow-y-auto overflow-x-hidden px-5 pb-10 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden space-y-4"
         style={{ touchAction: 'pan-y', overscrollBehavior: 'contain' }}
       >
         {/* Error banner */}
@@ -248,15 +265,28 @@ export function CalendarScreen() {
 
         {/* Monthly summary */}
         <div className="bg-secondary rounded-2xl p-4">
-          <p className="text-muted-foreground text-xs mb-1">本月统计</p>
-          <p
-            className="text-foreground"
-            style={{ fontFamily: "'DM Serif Display', serif", fontSize: '1.05rem' }}
-          >
-            已浇水{' '}
-            <span className="text-primary">{summary.totalWaterings}</span> 次，涉及{' '}
-            <span className="text-primary">{summary.totalPlants}</span> 株植物
-          </p>
+          <p className="text-foreground text-sm font-medium">本月统计</p>
+          <div className="h-px bg-border/70 my-3" />
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <p className="text-muted-foreground text-xs">浇水次数</p>
+              <p
+                className="text-primary mt-1"
+                style={{ fontFamily: "'DM Serif Display', serif", fontSize: '1.35rem' }}
+              >
+                {summaryLoading ? '...' : `${displayedSummary.totalWaterings} 次`}
+              </p>
+            </div>
+            <div>
+              <p className="text-muted-foreground text-xs">涉及植物</p>
+              <p
+                className="text-primary mt-1"
+                style={{ fontFamily: "'DM Serif Display', serif", fontSize: '1.35rem' }}
+              >
+                {summaryLoading ? '...' : `${displayedSummary.totalPlants} 株`}
+              </p>
+            </div>
+          </div>
         </div>
       </div>
     </div>

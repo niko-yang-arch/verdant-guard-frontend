@@ -94,6 +94,15 @@ export function EditPlantScreen({
       err ? "border-destructive" : "border-border"
     }`;
 
+  const sliderMin = form.frequencyType === "TIMES_PER_DAY" ? 2 : 1;
+  const sliderMax = form.frequencyType === "TIMES_PER_DAY" ? 12 : 30;
+  const sliderValue = Number.isFinite(parseInt(form.frequency))
+    ? Math.min(sliderMax, Math.max(sliderMin, parseInt(form.frequency)))
+    : sliderMin;
+  const sliderStartOffset = 3.5;
+  const sliderPercent =
+    sliderStartOffset + ((sliderValue - sliderMin) / (sliderMax - sliderMin)) * (100 - sliderStartOffset);
+
   return (
     <motion.div
       initial={{ y: "100%" }}
@@ -104,7 +113,7 @@ export function EditPlantScreen({
       style={{ fontFamily: "'DM Sans', sans-serif", touchAction: 'pan-y', overscrollBehavior: 'contain' }}
     >
       {/* Header */}
-      <div className="px-5 pt-6 pb-4 flex items-center gap-3 border-b border-border sticky top-0 bg-background z-10">
+      <div className="px-5 pt-6 pb-4 flex items-center gap-3 border-b border-border sticky top-0 z-30 bg-[#f2f7f0] shadow-[0_2px_12px_rgba(26,46,26,0.06)] isolate">
         <button onClick={onBack} className="p-1.5">
           <ArrowLeft size={20} className="text-foreground" />
         </button>
@@ -156,7 +165,7 @@ export function EditPlantScreen({
               type="button"
               onClick={() => {
                 set("frequencyType", "DAYS");
-                set("frequency", "7");
+                set("frequency", "1");
               }}
               className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all ${
                 form.frequencyType === "DAYS" ? "bg-white text-primary shadow-sm" : "text-muted-foreground"
@@ -235,19 +244,11 @@ export function EditPlantScreen({
             <div className="relative h-2 bg-white rounded-full">
               <div
                 className="absolute h-full bg-primary rounded-full"
-                style={{
-                  width: form.frequencyType === "TIMES_PER_DAY"
-                    ? `${((parseInt(form.frequency) - 1.6) / 10.4) * 100}%`
-                    : `${(parseInt(form.frequency) / 30) * 100}%`
-                }}
+                style={{ width: `${sliderPercent}%` }}
               />
               <div
                 className="absolute w-5 h-5 bg-white border-2 border-primary rounded-full shadow-md -top-1.5 transition-transform active:scale-110"
-                style={{
-                  left: form.frequencyType === "TIMES_PER_DAY"
-                    ? `calc(${((parseInt(form.frequency) - 1.6) / 10.4) * 100}% - 10px)`
-                    : `calc(${(parseInt(form.frequency) / 30) * 100}% - 10px)`
-                }}
+                style={{ left: `calc(${sliderPercent}% - 10px)` }}
               />
             </div>
           </div>
@@ -262,8 +263,8 @@ export function EditPlantScreen({
           </div>
 
           {/* Type selector */}
-          <div className="flex gap-2 items-center mt-4">
-            <div className="flex-1">
+          <div className="grid grid-cols-[minmax(0,1fr)_3.5rem] gap-2 items-center mt-4">
+            <div className="min-w-0">
               <input
                 type="number"
                 value={form.frequency}
@@ -273,7 +274,7 @@ export function EditPlantScreen({
                 className={inputClass(errors.frequency)}
               />
             </div>
-            <div className="px-4 py-2.5 text-sm text-muted-foreground">
+            <div className="py-2.5 text-sm text-muted-foreground text-right">
               {form.frequencyType === "TIMES_PER_DAY" ? "次/天" : "天/次"}
             </div>
           </div>
@@ -286,7 +287,7 @@ export function EditPlantScreen({
         </Field>
 
         {/* Save button */}
-        <div className="px-5 pb-8 pt-3">
+        <div className="pb-8 pt-3">
           <motion.button
             onClick={handleSave}
             disabled={saving}
