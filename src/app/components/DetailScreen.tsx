@@ -204,14 +204,13 @@ export function DetailScreen({
           >
             💧
           </div>
-          <div>
+          <div className="min-h-12 flex items-center">
             <p
               className="font-medium text-sm"
               style={{ color: isNeedWater ? '#c0392b' : '#2d6a2d' }}
             >
               {waterStatusText}
             </p>
-            <p className="text-muted-foreground text-xs mt-0.5">{freqLabel}</p>
           </div>
         </div>
 

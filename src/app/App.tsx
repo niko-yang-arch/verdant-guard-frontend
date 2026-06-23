@@ -156,20 +156,21 @@ export default function App() {
     }
   };
 
-  const handleAddPlant = async (data: { name: string; species: string; frequency: number; frequencyType: 'DAYS' | 'TIMES_PER_DAY'; image?: string }) => {
+  const handleAddPlant = async (data: { name: string; species: string; frequency: number; frequencyType: 'DAYS' | 'TIMES_PER_DAY'; image?: string | null }) => {
     try {
       let newPlant = await apiAddPlant(data);
       if (newPlant.historyCount === undefined || newPlant.historyCount === null) {
         newPlant = { ...newPlant, historyCount: 0 };
       }
       setPlants((ps) => [newPlant, ...ps]);
+      getPlantList().then(setPlants).catch(() => {});
       setShowAdd(false);
     } catch (e: any) {
       alert('添加失败: ' + e.message);
     }
   };
 
-  const handleEditPlant = async (id: number, data: { name: string; species: string; frequency: number; frequencyType: 'DAYS' | 'TIMES_PER_DAY'; image?: string }) => {
+  const handleEditPlant = async (id: number, data: { name: string; species: string; frequency: number; frequencyType: 'DAYS' | 'TIMES_PER_DAY'; image?: string | null }) => {
     try {
       let updatedPlant = await updatePlant(id, data);
       if (updatedPlant.historyCount === undefined || updatedPlant.historyCount === null) {
@@ -177,6 +178,7 @@ export default function App() {
         updatedPlant = { ...updatedPlant, historyCount: original?.historyCount || 0 };
       }
       setPlants((ps) => ps.map((p) => (p.id === id ? updatedPlant : p)));
+      getPlantList().then(setPlants).catch(() => {});
       if (selectedPlant?.id === id) {
         setSelectedPlant(updatedPlant);
       }

@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { motion } from "motion/react";
-import { ArrowLeft, Camera, Check } from "lucide-react";
-import { Plant, FrequencyType } from "../api";
+import { ArrowLeft, Loader2 } from "lucide-react";
+import { Plant, FrequencyType, uploadImage } from "../api";
+import { PlantImagePicker } from "./PlantImagePicker";
 
 type FormData = {
   name: string;
@@ -20,15 +21,6 @@ const FREQ_PRESETS = [
   { label: "一月", frequency: 30, type: "DAYS" as FrequencyType },
 ];
 
-const SAMPLE_IMAGES = [
-  "https://images.unsplash.com/photo-1614594975525-e45190c55d0b",
-  "https://images.unsplash.com/photo-1636525653613-2a3a05c00759",
-  "https://images.unsplash.com/photo-1600411833867-a85cd3c2349e",
-  "https://images.unsplash.com/photo-1509423350716-97f9360b4e09",
-  "https://images.unsplash.com/photo-1459411552884-841db9b3cc2a",
-  "https://images.unsplash.com/photo-1626929252164-27c26d107b00",
-];
-
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div>
@@ -43,7 +35,7 @@ export function AddPlantScreen({
   onSave,
 }: {
   onBack: () => void;
-  onSave: (plant: Omit<Plant, "id" | "createdAt" | "historyCount" | "lastWatered">) => void;
+  onSave: (plant: Omit<Plant, "id" | "createdAt" | "historyCount" | "lastWatered">) => void | Promise<void>;
 }) {
   const [form, setForm] = useState<FormData>({
     name: "",
@@ -52,7 +44,8 @@ export function AddPlantScreen({
     frequencyType: "DAYS",
     image: "",
   });
-  const [saved, setSaved] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [imageFile, setImageFile] = useState<File | null>(null);
   const [errors, setErrors] = useState<Partial<Record<keyof FormData, string>>>({});
 
   const set = (key: keyof FormData, val: string) =>
@@ -68,19 +61,30 @@ export function AddPlantScreen({
     return Object.keys(e).length === 0;
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
+    if (saving) return;
     if (!validate()) return;
-    setSaved(true);
-    setTimeout(() => {
-      onSave({
+    setSaving(true);
+
+    try {
+      let image = form.image || null;
+      if (imageFile) {
+        const uploaded = await uploadImage(imageFile);
+        image = uploaded.url;
+      }
+
+      await onSave({
         name: form.name.trim(),
         species: form.species.trim(),
         frequency: parseInt(form.frequency),
         frequencyType: form.frequencyType,
-        image: form.image || null,
+        image,
       });
-      onBack();
-    }, 800);
+    } catch (e: any) {
+      alert("保存失败: " + e.message);
+    } finally {
+      setSaving(false);
+    }
   };
 
   const inputClass = (err?: string) =>
@@ -113,32 +117,12 @@ export function AddPlantScreen({
       <div className="px-5 py-5 space-y-5">
         {/* Photo picker */}
         <Field label="植物图片（可选）">
-          <div className="space-y-2">
-            <div
-              className="w-full h-36 rounded-xl bg-secondary border-2 border-dashed border-border flex flex-col items-center justify-center gap-2 overflow-hidden cursor-pointer"
-              style={form.image ? { backgroundImage: `url(${form.image}?w=600&h=280&fit=crop)`, backgroundSize: "cover", backgroundPosition: "center" } : {}}
-            >
-              {!form.image && (
-                <>
-                  <Camera size={24} className="text-muted-foreground" />
-                  <p className="text-muted-foreground text-xs">选择一张示例图片</p>
-                </>
-              )}
-            </div>
-            <div className="grid grid-cols-6 gap-1.5">
-              {SAMPLE_IMAGES.map((url) => (
-                <button
-                  key={url}
-                  onClick={() => set("image", url)}
-                  className={`aspect-square rounded-lg overflow-hidden border-2 transition-colors ${
-                    form.image === url ? "border-primary" : "border-transparent"
-                  }`}
-                >
-                  <img src={`${url}?w=80&h=80&fit=crop`} className="w-full h-full object-cover" />
-                </button>
-              ))}
-            </div>
-          </div>
+          <PlantImagePicker
+            image={form.image}
+            uploading={saving && Boolean(imageFile)}
+            onImageChange={(image) => set("image", image)}
+            onFileChange={setImageFile}
+          />
         </Field>
 
         <Field label="植物名称 *">
@@ -303,12 +287,13 @@ export function AddPlantScreen({
         <div className="px-5 pb-8 pt-3">
           <motion.button
             onClick={handleSave}
+            disabled={saving}
             whileTap={{ scale: 0.97 }}
-            className="w-full py-4 rounded-2xl bg-primary text-primary-foreground text-sm font-medium flex items-center justify-center gap-2"
+            className="w-full py-4 rounded-2xl bg-primary text-primary-foreground text-sm font-medium flex items-center justify-center gap-2 disabled:opacity-70"
           >
-            {saved ? (
+            {saving ? (
               <>
-                <Check size={18} /> 已添加！
+                <Loader2 size={18} className="animate-spin" /> 正在保存
               </>
             ) : (
               "添加植物"

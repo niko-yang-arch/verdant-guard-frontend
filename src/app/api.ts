@@ -85,7 +85,7 @@ export interface AddPlantPayload {
   species: string;
   frequency: number;
   frequencyType: FrequencyType;
-  image?: string;
+  image?: string | null;
 }
 
 export type FeedbackType = 'bug' | 'suggestion' | 'other';
@@ -185,6 +185,7 @@ export const submitFeedback = (payload: SubmitFeedbackPayload) =>
 // ── Upload ─────────────────────────────────────────────────────────────────────
 
 export interface UploadResponse {
+  id?: string;
   url: string;
 }
 
@@ -192,7 +193,7 @@ export interface UploadResponse {
 export const uploadImage = (file: File) => {
   const form = new FormData();
   form.append('file', file);
-  return api.post<UploadResponse>('/api/upload/image', form, {
+  return api.post<UploadResponse>('/api/upload/plant-image', form, {
     headers: { 'Content-Type': 'multipart/form-data' },
   }).then((r) => r.data);
 };
