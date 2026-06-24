@@ -289,6 +289,7 @@ export function AddPlantScreen({
           <motion.button
             onClick={handleSave}
             disabled={saving}
+            data-testid="save-plant-button"
             whileTap={{ scale: 0.97 }}
             className="w-full py-4 rounded-2xl bg-primary text-primary-foreground text-sm font-medium flex items-center justify-center gap-2 disabled:opacity-70"
           >

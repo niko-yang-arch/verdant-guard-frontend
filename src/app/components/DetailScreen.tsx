@@ -186,6 +186,7 @@ export function DetailScreen({
         </button>
         <button
           onClick={() => onEdit(plant)}
+          aria-label="编辑植物"
           className="absolute top-12 right-4 p-2 rounded-full bg-black/30 text-white backdrop-blur-sm"
         >
           <Edit3 size={18} />
@@ -278,6 +279,8 @@ export function DetailScreen({
         <div className="flex gap-3 pb-8">
           <button
             onClick={() => setShowDeleteConfirm(true)}
+            aria-label="删除植物"
+            data-testid="delete-plant-button"
             className="w-12 h-12 rounded-2xl border border-border bg-card flex items-center justify-center text-destructive shrink-0"
           >
             <Trash2 size={18} />
@@ -286,6 +289,7 @@ export function DetailScreen({
           <motion.button
             onClick={handleWater}
             disabled={watering}
+            data-testid="water-plant-button"
             whileTap={watering ? {} : { scale: 0.96 }}
             className="flex-1 py-3 rounded-2xl bg-primary text-primary-foreground text-sm flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
           >

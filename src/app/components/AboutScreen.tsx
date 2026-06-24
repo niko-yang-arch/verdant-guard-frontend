@@ -1,5 +1,5 @@
 import { motion } from 'motion/react';
-import { ArrowLeft, Leaf, Heart, Users, Mail, Star, Award, Sparkles } from 'lucide-react';
+import { ArrowLeft, Leaf, Heart, Mail } from 'lucide-react';
 
 const FEATURES = [
   {
@@ -69,7 +69,7 @@ export function AboutScreen({ onBack }: { onBack: () => void }) {
             className="text-xl font-medium mb-2"
             style={{ fontFamily: "'DM Serif Display', serif" }}
           >
-            Verdant Guard
+            绿植渴了
           </motion.h2>
           
           <motion.p
@@ -155,31 +155,23 @@ export function AboutScreen({ onBack }: { onBack: () => void }) {
       
 
       {/* Contact */}
-      <div className="px-5 py-4 pb-16">
+      <div className="px-5 pt-3 pb-8">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.9 }}
-          className="bg-card border border-border rounded-2xl p-5 text-center"
+          className="bg-card border border-border rounded-2xl px-5 py-4 text-center"
         >
-          <Mail size={24} className="mx-auto text-primary mb-3" />
-          <h4 className="text-foreground font-medium mb-2">联系我</h4>
+          <Mail size={22} className="mx-auto text-primary mb-2" />
+          <h4 className="text-foreground font-medium mb-1.5">联系我</h4>
           <p className="text-muted-foreground text-sm">296831450@qq.com</p>
-          <div className="flex justify-center gap-4 mt-4">
-            <a href="#" className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center">
-              <Users size={16} className="text-muted-foreground" />
-            </a>
-            <a href="#" className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center">
-              <Heart size={16} className="text-muted-foreground" />
-            </a>
-          </div>
         </motion.div>
       </div>
 
       {/* Footer */}
-      <div className="px-5 pb-8">
+      <div className="px-5 pb-5">
         <p className="text-center text-muted-foreground text-xs">
-          © 2024 Verdant Guard. All rights reserved.
+          © 2026 绿植渴了. All rights reserved.
         </p>
       </div>
     </motion.div>

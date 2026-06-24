@@ -279,6 +279,7 @@ export default function App() {
                     <button
                       key={item.id}
                       onClick={() => setTab(item.id)}
+                      data-testid={`nav-${item.id}`}
                       className="flex-1 flex flex-col items-center gap-0.5 py-1"
                     >
                       <Icon size={20} className={active ? 'text-primary' : 'text-muted-foreground'} />

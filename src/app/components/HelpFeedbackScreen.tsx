@@ -8,27 +8,27 @@ const DEFAULT_FAQS: HelpFaq[] = [
   {
     id: 'add-plant',
     question: '如何添加新的植物？',
-    answer: '点击首页右下角的"+"按钮，进入添加植物页面。填写植物名称、种类和浇水频率，选择一张图片即可完成添加。',
+    answer: '在首页点击右上角的绿色"+"按钮进入"添加新植物"页面。您可以上传植物图片，填写植物名称、植物种类，选择"单次/多天一次"或"一天多次"的浇水频率，最后保存即可。',
   },
   {
     id: 'watering-reminder',
     question: '浇水提醒是如何工作的？',
-    answer: '根据您设置的浇水频率，系统会在应该浇水的前一天发送通知提醒。确保在设置中开启了浇水提醒通知权限。',
+    answer: '系统会根据每株植物设置的浇水频率计算状态。首页会在"今日提醒"中显示今天需要浇水的植物，植物卡片和详情页也会显示"今天需要浇水"、"明天需要浇水"或"还有几天浇水"。',
   },
   {
     id: 'plant-limit',
     question: '可以同时管理多少棵植物？',
-    answer: 'Verdant Guard 对植物数量没有限制，您可以添加任意数量的植物进行管理。',
+    answer: '目前界面没有设置植物数量上限。添加后的植物会出现在首页"我的植物"列表中，也可以通过顶部搜索框按植物名称或种类快速查找。',
   },
   {
     id: 'delete-plant',
     question: '如何删除一棵植物？',
-    answer: '进入植物详情页，点击右上角的"..."菜单，选择删除选项。删除后该植物的所有浇水记录也会一并清除。',
+    answer: '在首页点击植物卡片进入详情页，点击底部左侧的垃圾桶按钮，然后在弹窗中点击"确认删除"。删除后会同步清除该植物的所有浇水记录，且无法恢复。',
   },
   {
     id: 'cloud-sync',
     question: '数据会自动同步吗？',
-    answer: '是的，所有数据都会自动云端同步。换设备登录同一账号后，您的植物和浇水记录都会保留。',
+    answer: '会。登录后，新增植物、编辑信息、记录浇水和删除植物都会保存到云端；重新进入应用或换设备登录同一账号后，会自动拉取您的植物和浇水记录。',
   },
 ];
 
@@ -40,7 +40,7 @@ const FEEDBACK_TYPES: { icon: React.ReactNode; label: string; value: FeedbackTyp
 
 export function HelpFeedbackScreen({ onBack }: { onBack: () => void }) {
   const [faqs, setFaqs] = useState<HelpFaq[]>(DEFAULT_FAQS);
-  const [supportEmail, setSupportEmail] = useState('support@verdantguard.com');
+  const [supportEmail, setSupportEmail] = useState('296831450@qq.com');
   const [expandedFaq, setExpandedFaq] = useState<number | null>(null);
   const [selectedType, setSelectedType] = useState<FeedbackType>('suggestion');
   const [feedback, setFeedback] = useState('');
@@ -53,7 +53,7 @@ export function HelpFeedbackScreen({ onBack }: { onBack: () => void }) {
     getHelpFeedbackConfig()
       .then((config) => {
         setFaqs(Array.isArray(config?.faqs) && config.faqs.length > 0 ? config.faqs : DEFAULT_FAQS);
-        setSupportEmail(config.supportEmail || 'support@verdantguard.com');
+        setSupportEmail(config.supportEmail || '296831450@qq.com');
       })
       .catch(() => {
         setFaqs(DEFAULT_FAQS);
@@ -123,7 +123,7 @@ export function HelpFeedbackScreen({ onBack }: { onBack: () => void }) {
           </div>
           <div>
             <p className="text-foreground text-sm font-medium">遇到问题或有好建议？</p>
-            <p className="text-muted-foreground text-xs mt-0.5">我们随时为您提供帮助</p>
+            <p className="text-muted-foreground text-xs mt-0.5">我随时为您提供帮助</p>
           </div>
         </div>
       </div>
@@ -290,7 +290,7 @@ export function HelpFeedbackScreen({ onBack }: { onBack: () => void }) {
               感谢反馈！
             </h2>
             <p className="text-muted-foreground text-sm leading-relaxed mt-2">
-              您的反馈我们已经收到，会认真查看并持续优化 Verdant Guard。
+              您的反馈我已经收到，会认真查看并持续优化绿植渴了。
             </p>
             <button
               type="button"

@@ -26,6 +26,7 @@ function PlantCard({ plant, onClick }: { plant: Plant; onClick: () => void }) {
     <motion.button
       whileTap={{ scale: 0.98 }}
       onClick={onClick}
+      data-testid={`plant-card-${plant.id}`}
       className="w-full bg-card border border-border rounded-2xl overflow-hidden text-left flex flex-col"
     >
       {/* Image area */}
@@ -129,6 +130,8 @@ export function HomeScreen({
           <div className="flex items-center gap-2">
             <button
               onClick={onAddClick}
+              aria-label="添加植物"
+              data-testid="add-plant-button"
               className="w-9 h-9 rounded-full bg-primary flex items-center justify-center shadow-sm"
             >
               <Plus size={18} className="text-primary-foreground" />

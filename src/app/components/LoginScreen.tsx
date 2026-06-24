@@ -43,7 +43,7 @@ export function LoginScreen({ onLogin }: { onLogin: (code: string) => Promise<vo
             className="text-white mb-2"
             style={{ fontFamily: "'DM Serif Display', serif", fontSize: '2rem' }}
           >
-            Verdant Guard
+            绿植渴了
           </h1>
           <p className="text-white/60 text-sm">你的专属植物养护助手</p>
         </motion.div>
@@ -78,6 +78,7 @@ export function LoginScreen({ onLogin }: { onLogin: (code: string) => Promise<vo
         <button
           onClick={handleLogin}
           disabled={loading}
+          data-testid="wechat-login-button"
           className="w-full py-4 rounded-2xl bg-white text-primary font-medium flex items-center justify-center gap-2 text-sm shadow-lg disabled:opacity-60"
           style={{ color: '#2d6a2d' }}
         >

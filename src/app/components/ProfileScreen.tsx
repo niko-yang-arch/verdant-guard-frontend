@@ -114,7 +114,7 @@ export function ProfileScreen({
           <MenuItem icon={<LogOut size={16} />} label="退出登录" danger onClick={onLogout} />
         </div>
 
-        <p className="text-center text-muted-foreground text-xs pt-2">Verdant Guard v1.0</p>
+        <p className="text-center text-muted-foreground text-xs pt-2">绿植渴了 v1.0</p>
       </div>
     </div>
   );
